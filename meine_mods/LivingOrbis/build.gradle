@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+    id 'net.hytale.server.plugin' version '1.0.0-SNAPSHOT'
+}
+
+group = 'net.deinserver'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.hytale.com/repository/maven-public/' }
+}
+
+dependencies {
+    // Die Hytale Server API wird zur Laufzeit vom Server bereitgestellt
+    compileOnly 'net.hytale:server-api:1.0.0'
+    
+    // Gson für JSON-Verarbeitung
+    implementation 'com.google.code.gson:gson:2.10.1'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
