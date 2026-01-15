@@ -1,0 +1,198 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/gagah/.gradle/wrapper/dists/gradle-9.3.0-rc-3-bin/m54t8kd4iw2hyyg0y7ninbhh/gradle-9.3.0-rc-3/lib/native-platform-0.22-milestone-29.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+
+> Task :compileJava FAILED
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:3: Fehler: Package net.hytale.api.plugin ist nicht vorhanden
+import net.hytale.api.plugin.Plugin;
+                            ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:4: Fehler: Package net.hytale.api ist nicht vorhanden
+import net.hytale.api.HytaleServer;
+                     ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:5: Fehler: Package org.slf4j ist nicht vorhanden
+import org.slf4j.Logger;
+                ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:7: Fehler: Symbol nicht gefunden
+public class LivingOrbisPlugin extends Plugin {
+                                       ^
+  Symbol: Klasse Plugin
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:3: Fehler: Package net.hytale.api.event ist nicht vorhanden
+import net.hytale.api.event.Subscribe;
+                           ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:4: Fehler: Package net.hytale.api.event.entity ist nicht vorhanden
+import net.hytale.api.event.entity.PlayerInteractEntityEvent;
+                                  ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:5: Fehler: Package net.hytale.api.entity ist nicht vorhanden
+import net.hytale.api.entity.NpcEntity;
+                            ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:6: Fehler: Package net.hytale.api.entity ist nicht vorhanden
+import net.hytale.api.entity.Player;
+                            ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:7: Fehler: Package net.hytale.api ist nicht vorhanden
+import net.hytale.api.ChatColor;
+                     ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:18: Fehler: Symbol nicht gefunden
+    public void onInteract(PlayerInteractEntityEvent event) {
+                           ^
+  Symbol: Klasse PlayerInteractEntityEvent
+  Ort: Klasse NpcListener
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:17: Fehler: Symbol nicht gefunden
+    @Subscribe
+     ^
+  Symbol: Klasse Subscribe
+  Ort: Klasse NpcListener
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:11: Fehler: Methode überschreibt oder implementiert keine Methode aus einem Supertyp
+    @Override
+    ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:13: Fehler: Symbol nicht gefunden
+        Logger logger = getLogger();
+        ^
+  Symbol: Klasse Logger
+  Ort: Klasse LivingOrbisPlugin
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:13: Fehler: Symbol nicht gefunden
+        Logger logger = getLogger();
+                        ^
+  Symbol: Methode getLogger()
+  Ort: Klasse LivingOrbisPlugin
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:26: Fehler: Symbol nicht gefunden
+        HytaleServer.getEventManager().registerEvents(this, new NpcListener(geminiService));
+        ^
+  Symbol: Variable HytaleServer
+  Ort: Klasse LivingOrbisPlugin
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:31: Fehler: Methode überschreibt oder implementiert keine Methode aus einem Supertyp
+    @Override
+    ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:20: Fehler: Symbol nicht gefunden
+        if (!(event.getTarget() instanceof NpcEntity npc)) {
+                                           ^
+  Symbol: Klasse NpcEntity
+  Ort: Klasse NpcListener
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:24: Fehler: Symbol nicht gefunden
+        Player player = event.getPlayer();
+        ^
+  Symbol: Klasse Player
+  Ort: Klasse NpcListener
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:27: Fehler: Symbol nicht gefunden
+        player.sendMessage(ChatColor.GRAY + "Du sprichst " + npc.getName() + " an...");
+                           ^
+  Symbol: Variable ChatColor
+  Ort: Klasse NpcListener
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:52: Fehler: Symbol nicht gefunden
+                player.sendMessage(ChatColor.YELLOW + npc.getName() + ": " + ChatColor.WHITE + response);
+                                   ^
+  Symbol: Variable ChatColor
+  Ort: Klasse NpcListener
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:52: Fehler: Symbol nicht gefunden
+                player.sendMessage(ChatColor.YELLOW + npc.getName() + ": " + ChatColor.WHITE + response);
+                                                                             ^
+  Symbol: Variable ChatColor
+  Ort: Klasse NpcListener
+21 Fehler
+
+[Incubating] Problems report is available at: file:///F:/Hytale_Lab/meine_mods/LivingOrbis/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:18: Fehler: Symbol nicht gefunden
+      public void onInteract(PlayerInteractEntityEvent event) {
+                             ^
+    Symbol: Klasse PlayerInteractEntityEvent
+    Ort: Klasse NpcListener
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:17: Fehler: Symbol nicht gefunden
+      @Subscribe
+       ^
+    Symbol: Klasse Subscribe
+    Ort: Klasse NpcListener
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:13: Fehler: Symbol nicht gefunden
+          Logger logger = getLogger();
+          ^
+    Symbol: Klasse Logger
+    Ort: Klasse LivingOrbisPlugin
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:26: Fehler: Symbol nicht gefunden
+          HytaleServer.getEventManager().registerEvents(this, new NpcListener(geminiService));
+          ^
+    Symbol: Variable HytaleServer
+    Ort: Klasse LivingOrbisPlugin
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:20: Fehler: Symbol nicht gefunden
+          if (!(event.getTarget() instanceof NpcEntity npc)) {
+                                             ^
+    Symbol: Klasse NpcEntity
+    Ort: Klasse NpcListener
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:24: Fehler: Symbol nicht gefunden
+          Player player = event.getPlayer();
+          ^
+    Symbol: Klasse Player
+    Ort: Klasse NpcListener
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:27: Fehler: Symbol nicht gefunden
+          player.sendMessage(ChatColor.GRAY + "Du sprichst " + npc.getName() + " an...");
+                             ^
+    Symbol: Variable ChatColor
+    Ort: Klasse NpcListener
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:52: Fehler: Symbol nicht gefunden
+                  player.sendMessage(ChatColor.YELLOW + npc.getName() + ": " + ChatColor.WHITE + response);
+                                     ^
+    Symbol: Variable ChatColor
+    Ort: Klasse NpcListener
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:52: Fehler: Symbol nicht gefunden
+                  player.sendMessage(ChatColor.YELLOW + npc.getName() + ": " + ChatColor.WHITE + response);
+                                                                               ^
+    Symbol: Variable ChatColor
+    Ort: Klasse NpcListener
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:11: Fehler: Methode überschreibt oder implementiert keine Methode aus einem Supertyp
+      @Override
+      ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:31: Fehler: Methode überschreibt oder implementiert keine Methode aus einem Supertyp
+      @Override
+      ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:7: Fehler: Symbol nicht gefunden
+  public class LivingOrbisPlugin extends Plugin {
+                                         ^
+    Symbol: Klasse Plugin
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:13: Fehler: Symbol nicht gefunden
+          Logger logger = getLogger();
+                          ^
+    Symbol: Methode getLogger()
+    Ort: Klasse LivingOrbisPlugin
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:3: Fehler: Package net.hytale.api.plugin ist nicht vorhanden
+  import net.hytale.api.plugin.Plugin;
+                              ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:4: Fehler: Package net.hytale.api ist nicht vorhanden
+  import net.hytale.api.HytaleServer;
+                       ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:5: Fehler: Package org.slf4j ist nicht vorhanden
+  import org.slf4j.Logger;
+                  ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:3: Fehler: Package net.hytale.api.event ist nicht vorhanden
+  import net.hytale.api.event.Subscribe;
+                             ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:4: Fehler: Package net.hytale.api.event.entity ist nicht vorhanden
+  import net.hytale.api.event.entity.PlayerInteractEntityEvent;
+                                    ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:5: Fehler: Package net.hytale.api.entity ist nicht vorhanden
+  import net.hytale.api.entity.NpcEntity;
+                              ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:6: Fehler: Package net.hytale.api.entity ist nicht vorhanden
+  import net.hytale.api.entity.Player;
+                              ^
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\NpcListener.java:7: Fehler: Package net.hytale.api ist nicht vorhanden
+  import net.hytale.api.ChatColor;
+                       ^
+  21 Fehler
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.0-rc-3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1s
+1 actionable task: 1 executed

@@ -1,0 +1,86 @@
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/C:/Users/gagah/.gradle/wrapper/dists/gradle-9.3.0-rc-3-bin/m54t8kd4iw2hyyg0y7ninbhh/gradle-9.3.0-rc-3/lib/native-platform-0.22-milestone-29.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+
+> Task :compileJava FAILED
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\GeminiCommand.java:5: Fehler: Symbol nicht gefunden
+import com.hypixel.hytale.server.core.command.system.arguments.types.StringArgumentType;
+                                                                    ^
+  Symbol: Klasse StringArgumentType
+  Ort: Package com.hypixel.hytale.server.core.command.system.arguments.types
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:5: Fehler: Package org.slf4j ist nicht vorhanden
+import org.slf4j.Logger;
+                ^
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\GeminiCommand.java:25: Fehler: Symbol nicht gefunden
+        this.withRequiredArg("prompt", "The question to ask", StringArgumentType.string());
+                                                              ^
+  Symbol: Variable StringArgumentType
+  Ort: Klasse GeminiCommand
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\GeminiCommand.java:38: Fehler: Symbol nicht gefunden
+        String prompt = context.getArgument("prompt");
+                               ^
+  Symbol: Methode getArgument(String)
+  Ort: Variable context von Typ CommandContext
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:17: Fehler: Symbol nicht gefunden
+        getLogger().info("Living Orbis (ECS Edition) wird initialisiert...");
+                   ^
+  Symbol: Methode info(String)
+  Ort: Klasse HytaleLogger
+F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:26: Fehler: Symbol nicht gefunden
+        getLogger().info("Living Orbis Setup Complete. Use /ask to talk to Gemini.");
+                   ^
+  Symbol: Methode info(String)
+  Ort: Klasse HytaleLogger
+6 Fehler
+
+[Incubating] Problems report is available at: file:///F:/Hytale_Lab/meine_mods/LivingOrbis/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava'.
+> Compilation failed; see the compiler output below.
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\GeminiCommand.java:5: Fehler: Symbol nicht gefunden
+  import com.hypixel.hytale.server.core.command.system.arguments.types.StringArgumentType;
+                                                                      ^
+    Symbol: Klasse StringArgumentType
+    Ort: Package com.hypixel.hytale.server.core.command.system.arguments.types
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\GeminiCommand.java:25: Fehler: Symbol nicht gefunden
+          this.withRequiredArg("prompt", "The question to ask", StringArgumentType.string());
+                                                                ^
+    Symbol: Variable StringArgumentType
+    Ort: Klasse GeminiCommand
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\GeminiCommand.java:38: Fehler: Symbol nicht gefunden
+          String prompt = context.getArgument("prompt");
+                                 ^
+    Symbol: Methode getArgument(String)
+    Ort: Variable context von Typ CommandContext
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:17: Fehler: Symbol nicht gefunden
+          getLogger().info("Living Orbis (ECS Edition) wird initialisiert...");
+                     ^
+    Symbol: Methode info(String)
+    Ort: Klasse HytaleLogger
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:26: Fehler: Symbol nicht gefunden
+          getLogger().info("Living Orbis Setup Complete. Use /ask to talk to Gemini.");
+                     ^
+    Symbol: Methode info(String)
+    Ort: Klasse HytaleLogger
+  F:\Hytale_Lab\meine_mods\LivingOrbis\src\main\java\net\deinserver\livingorbis\LivingOrbisPlugin.java:5: Fehler: Package org.slf4j ist nicht vorhanden
+  import org.slf4j.Logger;
+                  ^
+  6 Fehler
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.3.0-rc-3/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 1s
+1 actionable task: 1 executed

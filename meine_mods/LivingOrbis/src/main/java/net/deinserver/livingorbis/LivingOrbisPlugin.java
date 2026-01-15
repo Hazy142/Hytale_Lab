@@ -1,37 +1,28 @@
 package net.deinserver.livingorbis;
 
-import net.hytale.api.plugin.Plugin;
-import net.hytale.api.HytaleServer;
-import org.slf4j.Logger;
+import com.hypixel.hytale.server.core.plugin.JavaPlugin;
+import com.hypixel.hytale.server.core.plugin.JavaPluginInit;
+import java.util.logging.Level;
 
-public class LivingOrbisPlugin extends Plugin {
-
+public class LivingOrbisPlugin extends JavaPlugin {
+    
     private GeminiService geminiService;
 
-    @Override
-    public void onEnable() {
-        Logger logger = getLogger();
-        logger.info("Living Orbis wird initialisiert... 🌍✨");
-
-        // In einer Produktionsumgebung sollte dieser Key niemals im Code stehen.
-        // Best Practice: Laden aus Umgebungsvariablen oder einer config.yml.
-        // Für dieses Beispiel implementieren wir den Key direkt, wie angefordert.
-        String apiKey = "AIzaSyAFU5y5cJNBedem1mZScxwxE4tDojuHmiI";
-
-        // Initialisierung des Service-Layers
-        this.geminiService = new GeminiService(apiKey);
-
-        // Registrierung des Event-Listeners beim Server-Manager
-        // Dies verknüpft unsere Logik mit dem Game-Loop.
-        HytaleServer.getEventManager().registerEvents(this, new NpcListener(geminiService));
-
-        logger.info("Living Orbis ist bereit! Sprich mit den NPCs.");
+    public LivingOrbisPlugin(JavaPluginInit init) {
+        super(init);
     }
 
     @Override
-    public void onDisable() {
-        // Aufräumarbeiten. Der HttpClient (in Java 25) managt Ressourcen meist
-        // automatisch,
-        // aber explizites Schließen von Executors wäre hier guter Stil.
+    public void setup() {
+        getLogger().at(Level.INFO).log("Living Orbis (ECS Edition) wird initialisiert...");
+        
+        // TODO: Load API Key from config or environment
+        String apiKey = "AIzaSyAFU5y5cJNBedem1mZScxwxE4tDojuHmiI";
+        this.geminiService = new GeminiService(apiKey);
+
+        // Register Command
+        this.getCommandRegistry().registerCommand(new GeminiCommand(geminiService));
+        
+        getLogger().at(Level.INFO).log("Living Orbis Setup Complete. Use /ask to talk to Gemini.");
     }
 }

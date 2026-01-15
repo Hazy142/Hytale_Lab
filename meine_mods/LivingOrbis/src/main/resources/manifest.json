@@ -1,0 +1,7 @@
+{
+  "Name": "LivingOrbis",
+  "Group": "net.deinserver.livingorbis",
+  "Version": "1.0.0",
+  "Main": "net.deinserver.livingorbis.LivingOrbisPlugin",
+  "Description": "Erweckt NPCs mit Gemini AI zum Leben."
+}
