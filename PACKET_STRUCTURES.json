@@ -1,0 +1,125 @@
+{
+  "0x01": {
+    "name": "MovementInput",
+    "direction": "client_to_server",
+    "description": "Player movement and rotation update",
+    "fields": [
+      {
+        "name": "playerID",
+        "type": "UUID",
+        "size": 16,
+        "offset": 0,
+        "description": "Unique player identifier"
+      },
+      {
+        "name": "position",
+        "type": "Vector3f",
+        "size": 12,
+        "offset": 16,
+        "fields": [
+          {"name": "x", "type": "f32", "offset": 0},
+          {"name": "y", "type": "f32", "offset": 4},
+          {"name": "z", "type": "f32", "offset": 8}
+        ]
+      },
+      {
+        "name": "velocity",
+        "type": "Vector3f",
+        "size": 12,
+        "offset": 28
+      },
+      {
+        "name": "yaw",
+        "type": "f32",
+        "size": 4,
+        "offset": 40,
+        "unit": "degrees",
+        "range": [0, 360]
+      },
+      {
+        "name": "pitch",
+        "type": "f32",
+        "size": 4,
+        "offset": 44,
+        "unit": "degrees",
+        "range": [-90, 90]
+      },
+      {
+        "name": "flags",
+        "type": "u8",
+        "size": 1,
+        "offset": 48,
+        "bits": {
+          "0": "is_jumping",
+          "1": "is_sprinting",
+          "2": "is_crouching",
+          "3": "is_swimming",
+          "4": "is_flying",
+          "5-7": "reserved"
+        }
+      },
+      {
+        "name": "tick",
+        "type": "u32",
+        "size": 4,
+        "offset": 49,
+        "description": "Server tick number for packet ordering"
+      }
+    ],
+    "total_size": 53,
+    "examples": [
+      {
+        "hex": "01a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d642c90000428000004348000000000000000000000000000043340000000000000200003039",
+        "decoded": {
+          "playerID": "a1b2c3d4-e5f6-a7b8-c9d0-e1f2a3b4c5d6",
+          "position": {"x": 100.5, "y": 64.0, "z": 200.0},
+          "velocity": {"x": 0.0, "y": 0.0, "z": 0.0},
+          "yaw": 180.0,
+          "pitch": 0.0,
+          "flags": 2,
+          "tick": 12345
+        }
+      }
+    ]
+  },
+  "0x03": {
+    "name": "ChatMessage",
+    "direction": "bidirectional",
+    "fields": [
+      {"name": "playerID", "type": "UUID", "size": 16, "offset": 0},
+      {"name": "messageLength", "type": "varint", "size": "variable", "offset": 16},
+      {"name": "message", "type": "UTF-8", "size": "variable", "offset": "after_length"},
+      {"name": "timestamp", "type": "u64", "size": 8, "offset": "after_message"}
+    ]
+  },
+  "0x05": {
+    "name": "BlockInteraction",
+    "direction": "client_to_server",
+    "fields": [
+      {"name": "playerID", "type": "UUID", "size": 16},
+      {"name": "blockPosition", "type": "Vector3i", "size": 12},
+      {"name": "face", "type": "u8", "size": 1, "enum": ["top", "bottom", "north", "south", "east", "west"]},
+      {"name": "actionType", "type": "u8", "size": 1, "enum": ["place", "break", "interact"]}
+    ]
+  },
+  "0x08": {
+    "name": "EntitySpawn",
+    "direction": "server_to_client",
+    "fields": [
+      {"name": "entityID", "type": "u32", "size": 4},
+      {"name": "entityType", "type": "u16", "size": 2, "enum": ["player", "monster", "npc", "item"]},
+      {"name": "position", "type": "Vector3f", "size": 12},
+      {"name": "rotation", "type": "Vector2f", "size": 8},
+      {"name": "metadata", "type": "NBT", "size": "variable"}
+    ]
+  },
+  "0x0F": {
+    "name": "GamePhaseChange",
+    "direction": "server_to_client",
+    "fields": [
+      {"name": "newPhase", "type": "u8", "size": 1, "enum": ["LOBBY", "DAY", "VOTING", "NIGHT", "END"]},
+      {"name": "duration", "type": "u32", "size": 4, "unit": "milliseconds"},
+      {"name": "announcement", "type": "UTF-8", "size": "variable"}
+    ]
+  }
+}
