@@ -13,11 +13,16 @@ public class LivingOrbisPlugin extends JavaPlugin {
     }
 
     @Override
-    public void setup() {
-        getLogger().at(Level.INFO).log("Living Orbis (ECS Edition) wird initialisiert...");
-        
-        // TODO: Load API Key from config or environment
-        String apiKey = "AIzaSyAFU5y5cJNBedem1mZScxwxE4tDojuHmiI";
+    public void onEnable() {
+        Logger logger = getLogger();
+        logger.info("Living Orbis wird initialisiert... 🌍✨");
+
+        // In einer Produktionsumgebung sollte dieser Key niemals im Code stehen.
+        // Best Practice: Laden aus Umgebungsvariablen oder einer config.yml.
+        // Für dieses Beispiel implementieren wir den Key direkt, wie angefordert.
+        String apiKey = "YOUR-API-KEY";
+
+        // Initialisierung des Service-Layers
         this.geminiService = new GeminiService(apiKey);
 
         // Register Command
