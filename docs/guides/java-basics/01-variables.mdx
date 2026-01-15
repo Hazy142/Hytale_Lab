@@ -1,0 +1,77 @@
+---
+title: 01 - Variablen & Datentypen
+description: Eine Einführung in Variablen und Datentypen in der Java-Programmierung.
+---
+
+Variablen sind Container, die Daten in deinem Programm speichern. Stell dir diese als beschriftete Boxen vor, in die du verschiedene Arten von Informationen legen kannst.
+
+## Was ist eine Variable?
+
+Eine Variable hat drei Hauptkomponenten:
+
+1. **Typ**: Welche Art von Daten sie enthält (z. B. Integer, String, Boolean)
+2. **Name**: Die Bezeichnung, die du verwendest, um auf die Variable zu verweisen
+3. **Wert**: Die darin enthaltenen Daten
+
+## Deklarieren/Erstellen von Variablen
+
+In Java musst du eine Variable deklarieren bevor du sie verwenden kannst, so wie du eine Box benötigst bevor du etwas in sie ablegen kannst. Die Syntax lautet:
+
+```java
+int age; // A declaration
+age = 18; // An assignment
+
+int age = 18; // Declaration and assignment in one line, also considered an initialization
+```
+
+## Primitive Datentypen
+
+Du fragst dich vielleicht, was "int" bedeutet. Es ist ein primitiver Datentyp in Java. Java hat 8 primitiven Datentypen. Hier sind die wichtigsten für Modding:
+
+| Datentyp | Beschreibung                          | Beispiel                   |
+| -------- | ------------------------------------- | -------------------------- |
+| int      | Ganze Zahlen                          | `int punkte = 100;`        |
+| double   | Dezimalzahlen (mit Punkt statt Komma) | `double pi = 3.14;`        |
+| boolean  | Wahr oder falsch (true oder false)    | `boolean istAktiv = true;` |
+| char     | Einzelnes Zeichen                     | `char note = 'A';`         |
+| String   | Zeichenfolge (Text)                   | `String name = "Hytale";`  |
+
+## Typumwandlung
+
+Manchmal möchtest du vielleicht nicht, dass eine Variable den gleichen Typ beibehält. Du kannst zwischen den Typen umwandeln:
+
+### Automatisch
+
+```java
+int num = 10;
+double decimalNum = num; // 10.0 - funktioniert automatisch
+```
+
+### Manuell (Casting)
+
+```java
+double decimalNum = 9.78;
+int num = (int) decimalNum; // 9 - Nachkommastellen fallen weg
+```
+
+## Konstanten
+
+Wenn du eine Variable willst, die sich nicht ändern sollte, verwendest du das `final` Schlüsselwort:
+
+```java
+final double PI = 3.14159;
+```
+
+**Konvention**: Konstanten verwenden NUR_GROßBUCHSTABEN_MIT_UNTERSTRICHEN.
+
+## Üben
+
+Es ist am besten, das zu üben, was du gerade gelernt hast - schau jetzt nicht oben und probier es selber zu machen. Schau nur nach oben, wenn du nicht weiter weißt!
+
+1. Deklariere eine ganzzahlige Variable namens `leben` und setzen Sie diese auf 3.
+2. Deklarieren Sie eine "double"-Variable namens „erdanziehung“ und setzen Sie diese auf 9,81.
+3. Deklariere eine "boolean"-Variable namens `istSpielVorbei` und setze diese auf false.
+4. Konvertiere die Variable „leben“ in eine Dezimalzahl und speichere diese in einer neuen Variable namens „lebenAlsDouble“.
+5. Deklariere eine Konstante namens `MAX_LEVEL` und setze diese auf 100.
+
+Super! Du hast etwas über Variablen und Datentypen in Java gelernt. In der nächsten Lektion wirst du etwas über Operatoren und Ausdrücke lernen.

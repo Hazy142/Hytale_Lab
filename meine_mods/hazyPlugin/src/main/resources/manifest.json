@@ -1,0 +1,7 @@
+{
+    "Name": "hazyPlugin",
+    "Group": "de.hazy",
+    "Version": "1.0.0",
+    "Main": "de.hazy.HazyPlugin",
+    "Description": "A simple Hytale plugin with /hazy command"
+}

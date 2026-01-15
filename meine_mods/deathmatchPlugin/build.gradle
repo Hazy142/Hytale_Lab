@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+}
+
+group = 'de.hazy.deathmatch'
+version = '1.0.1'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Add your HytaleServer.jar as a compile-only dependency   
+    compileOnly files('../1013/Server/HytaleServer.jar')
+}
+
+jar {
+    archiveBaseName = 'deathmatchPlugin'
+    archiveVersion = '1.0.1'
+}

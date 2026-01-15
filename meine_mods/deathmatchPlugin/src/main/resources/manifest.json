@@ -1,0 +1,7 @@
+{
+    "Name": "deathmatchPlugin",
+    "Group": "de.hazy.deathmatch",
+    "Version": "1.0.0",
+    "Main": "de.hazy.deathmatch.DeathmatchPlugin",
+    "Description": "1v1 Deathmatch CS:GO-style game mode"
+}

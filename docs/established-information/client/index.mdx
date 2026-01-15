@@ -1,0 +1,69 @@
+---
+title: Der Hytale Client
+description: Informationen zum Hytale Client.
+---
+
+<Callout>
+  Der Client ist in C# geschrieben, in Maschinencode kompiliert und ist nicht modifizierbar. Einzelspieler läuft auf einem lokalen Server. Alle Mods müssen durch die Server-API gehen.
+</Callout>
+
+# Keine Client-Side Mods
+
+Es gibt keine Client-Side Mods.
+
+> Wir beabsichtigen keine Client-Mods zu unterstützen - Slikey
+
+## Warum?
+
+1. Kein externer Download nötig.
+   * Hytale möchte "ein fragmentiertes Ökosystem vermeiden, bei dem jeder Server einen anderen modifizierten Client benötigt".
+
+2. Client-Sicherheit
+   * Das Ausführen von `.jar` Dateien von Websites von Drittanbietern auf dem Client kann leicht Computerviren einführen.
+   > Wir wollen unsere Spieler nicht den Sicherheitsrisiken aussetzen, die auf manchen anderen Modding-Plattformen existieren. [übersetzt]
+
+3. Client-Stabilität
+   * Hytale könnte in der Zukunft auch auf anderen Plattformen erscheinen, auf denen Client-Modding unmöglich ist. Deshalb wird diese Richtung schon frühzeitig vorgegeben.
+   > Wir glauben, dass die Ergebnisse, die Leute in anderen Blockspielen mit Client-Mods erhalten, leicht mit unserem serverseitigen Modding erreicht werden können. In anderen Blockspielen musst du eine Client-Mod installieren, um neue Blöcke, NPCs, UI usw. zu erhalten. Hytale erledigt all das nur, indem es auf den Server hört. Der Server wird im Grunde den Client vorübergehend auf eine wirklich sichere Art und Weise modifizieren, um dein Spielerlebnis zu ergänzen und zu verändern. Du könntest deine eigene Version von Orbis erstellen, in der du keines unserer Modelle, Musik, Weltgeneration, Kampfsystem oder sonstiges verwendest. Du hast die Kontrolle und kannst all das herausreißen, ohne jemals den Client anzufassen. Denk daran, wie Roblox funktioniert. Du änderst nie deine App. Du klickst einfach auf ein Erlebnis deiner Wahl und bekommst alles, was du brauchst, ohne deine Installation selber modifizieren zu müssen. [übersetzt] - Slikey
+
+## Client-Mods werden nicht benötigt
+
+Die typischen Anwendungsfälle für Client-Mods sind:
+
+* Kosmetische Änderungen (Ressourcenpakete, Shader, Capes, etc.): Server bestimmen das Visuelle, nicht der Client.
+* Leistung: Das Basisspiel bietet alle notwendigen Performance-Einstellungen.
+* Barrierefreiheit: Das Basisspiel wird für sich allein zugänglich sein.
+* Benutzeroberfläche: Server bestimmen die Benutzeroberfläche, nicht der Client.
+
+### Clientseitige Prädiktion
+
+Hytale verwendet datengestützte clientseitige Prädiktion, um Verzögerungen zu mildern, da alle Interaktionen auf dem Server stattfinden und an den Client zurückgeleitet werden. Dies ist für einige Systeme bereits vorhanden, ist aber derzeit begrenzt, wobei für die Zukunft eine weitere Integration geplant ist. Es ist auch geplant, dass dies in Zukunft mit dem visuellen Skripting-System funktioniert, um weiter zu optimieren.
+
+## Clientseitige Ausführung
+
+Das Team prüft derzeit die Möglichkeit, die Ausführung von Code durch den Client zuzulassen (was sich vom Modding des Clients unterscheidet; hierbei handelt es sich um Code, der vom Server gesendet wird), allerdings kann dies nicht garantiert werden.
+
+# Models
+
+Der Client und die Asset-Pipeline akzeptieren `.blockymodel`, ein spezielles Format für Hytale. Das offizielle Blockbench Plugin ermöglicht den Export in dieses Format.
+
+# Technische Client Details
+
+Es wird immer nur eine aktuelle, unterstützte Version des Clients geben.
+
+> Die Java-Version wird von uns aktualisiert und momentan sind wir auf der neuesten Version (Java 25).
+> Die Spielversion wird nicht wählbar sein, um den Versionsdschungel zu vermeiden, den wir auf unserem Hypixel Server-Netzwerk erlebt haben. Wir möchten einfach sicherstellen, dass Multiplayer-Netzwerke sich darauf verlassen können, dass Spieler über die neueste Version des Spiels verfügen, damit nicht 15+ Versionen des Clients unterstützt werden müssen. [übersetzt] - Slikey
+
+Der Client unterstützt Multithreading.
+
+## GUI
+
+Die GUI wurde mit Noesis C# Bindings gebaut.
+
+## Bau-System
+
+Hytale verwendet NativeAOT ("Ahead of Time") um den Client zu bauen, was C# zu Maschinencode kompiliert, für die Distribution. Das bedeutet, ohne Reverse-Engineering des Maschinencodes, müssen Mods über die Server-API laufen.
+
+# Weitere Informationen
+
+Der Client hat eine eigene Versionierung und ein Protokoll, um mit Servern zu interagieren.

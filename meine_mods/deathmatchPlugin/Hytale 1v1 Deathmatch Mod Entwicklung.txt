@@ -1,0 +1,684 @@
+﻿Engineering der Arena: Ein umfassender Forschungsbericht zur serverseitigen Modding-Architektur von Hytale und die Entwicklung eines kompetitiven 1v1-Deathmatch-Systems
+Datum: 14. Januar 2026
+Verfasst von: Senior Systems Architect & Hytale Gameplay Engineer
+Betreff: Exhaustive Analyse der Hytale-Server-Modding-Fähigkeiten, API-Architektur und Implementierungsstrategie für kompetitive Systeme
+________________
+1. Exekutive Zusammenfassung und Einführung in das Hytale-Ökosystem
+Der 13. Januar 2026 markiert mit der Veröffentlichung von Hytale im Early Access einen historischen Wendepunkt in der Geschichte der Voxel-Sandbox-Spiele.1 Nach Jahren der Entwicklung, die durch eine Übernahme durch Riot Games und eine grundlegende Überarbeitung der Engine geprägt waren, steht der Community nun eine Plattform zur Verfügung, die Modding nicht als nachträglichen Gedanken, sondern als Kernpfeiler ihrer Architektur betrachtet. Im Gegensatz zu Vorgängern wie Minecraft, bei denen Modding oft auf fragilen Client-seitigen Injektionen oder komplexen Loader-Systemen wie Forge oder Fabric basierte, führt Hytale eine radikale "Server-Side First"-Philosophie ein.3
+Dieser Bericht dient als umfassende technische Dokumentation und Implementierungsleitfaden für die Entwicklung einer vollfunktionsfähigen "1v1 Deathmatch"-Modifikation. Das Ziel ist nicht nur die Bereitstellung von Code-Snippets, sondern die detaillierte Erörterung des gesamten Engineering-Lebenszyklus – von der Konfiguration der Java 25-Laufzeitumgebung über die Architektur des Entity Component Systems (ECS) bis hin zur Handhabung von Latenzkompensation und OAuth 2.0-Authentifizierung. Wir analysieren die vier Säulen des Hytale-Moddings – Server-Plugins, Data Assets, Art Assets und Save Files – und demonstrieren, wie diese konvergieren, um eine nahtlose Benutzererfahrung zu schaffen, bei der Spieler keine externen Dateien manuell herunterladen müssen.3
+Die Relevanz dieses Berichts ergibt sich aus der Notwendigkeit für Entwickler, sich schnell an die neuen Paradigmen der Hytale-API anzupassen, die zwar Konzepte aus der Bukkit/Spigot-Ära entleiht, diese aber durch moderne Software-Design-Patterns und die Leistungsfähigkeit von Java 25 modernisiert.6
+________________
+2. Die technische Landschaft: Java 25 und die Server-Architektur
+2.1 Das Paradigma der serverseitigen Autorität
+Das definierende Merkmal der Hytale-Engine ist ihre strikte Trennung von Client und Server, wobei der Server die absolute Autorität über Spielzustände und Assets besitzt. In traditionellen Modding-Szenarien mussten Client und Server oft gespiegelte Installationen von Mod-Dateien aufweisen, was zu erheblichen Reibungsverlusten ("Version Mismatch") führte. Hytale eliminiert dies durch ein dynamisches Asset-Streaming-System.
+Wenn sich ein Client mit einem Hytale-Server verbindet, initiiert der Server einen Handshake und überträgt die notwendigen Data Assets (JSON-Definitionen für Blöcke, Items, NPCs) und Art Assets (Modelle, Texturen, Sounds) direkt an den Client.3 Dieses "One Community, One Client"-Prinzip stellt sicher, dass der Client stabil und sicher bleibt, während der Server das Erlebnis diktiert.8 Für eine 1v1-Deathmatch-Mod ist dies von entscheidender Bedeutung: Es ermöglicht uns, benutzerdefinierte Arena-Geometrien, Waffenmodelle (z.B. ein "Gladiatorenschwert") und UI-Elemente (Scoreboards, Killfeeds) zu implementieren, ohne dass der Spieler ein Modpack vorinstallieren muss.
+2.2 Die Laufzeitumgebung: Java 25
+Hytale-Server laufen auf Java 25 (spezifisch empfohlen werden Builds wie Eclipse Temurin).6 Dies stellt einen signifikanten Sprung gegenüber den Java 8/16/21-Standards dar, die in früheren Generationen von Voxel-Servern üblich waren. Java 25 führt Funktionen ein, die die Art und Weise, wie wir hochperformante Spielschleifen schreiben, grundlegend verändern:
+* Project Valhalla (Value Objects): Obwohl die Integration über verschiedene Versionen hinweg variierte, ist die Speichereffizienz für Vektormathematik – entscheidend für Arena-Begrenzungsprüfungen (Bounding Box Checks) und Projektilphysik – in modernen JVMs drastisch verbessert. Durch die Reduzierung von Objekt-Headern und Indirektionen können wir Tausende von Partikeln oder Projektilen mit minimalem Overhead simulieren.
+* Virtual Threads (Project Loom): Die Netzwerkschicht von Hytale nutzt voraussichtlich virtuelle Threads, um Tausende von gleichzeitigen Verbindungen zu handhaben, ohne den Overhead von Betriebssystem-Threads zu verursachen. Für unsere Deathmatch-Mod bedeutet dies, dass wir theoretisch Hunderte von parallelen 1v1-Matches auf einer einzigen Serverinstanz verwalten können, ohne dass es zu einer Erschöpfung des Thread-Pools kommt.
+* Pattern Matching & Sealed Classes: Diese Sprachfeatures ermöglichen sicherere und ausdrucksstärkere Zustandsautomaten (State Machines). Wir werden sealed interfaces verwenden, um unsere Spielzustände (GameState.Lobby, GameState.Fighting, GameState.Ending) zu definieren, wodurch der Compiler die Vollständigkeit unserer Logik in switch-Ausdrücken überprüfen kann.
+________________
+3. Die vier Säulen des Hytale-Moddings
+Um ein komplexes System wie einen 1v1-Arena-Modus zu entwickeln, müssen wir verstehen, wo unsere Logik und unsere Daten leben. Die Hytale-Architektur unterteilt Modifikationen in vier technische Kategorien.3
+Mod-Typ
+	Technologie
+	Funktion im 1v1 Deathmatch
+	Server Plugins
+	Java (.jar)
+	Das "Gehirn". Verarbeitet Matchmaking, Schadensberechnung, Siegbedingungen, Inventar-Management und Befehle. Dies ist der Fokus dieses Berichts.
+	Data Assets
+	JSON
+	Die "Regeln". Definiert die Eigenschaften von Arena-Blöcken (z.B. unzerstörbare Wände), Waffenschadenstatistiken und Loot-Tabellen.
+	Art Assets
+	Blockbench / Texturen
+	Das "Aussehen". Benutzerdefinierte Modelle für Arena-Trophäen, Waffen-Skins und UI-Icons. Hytale unterstützt den Import direkt aus Blockbench.
+	Visual Scripts
+	Knoten-basiert (Nodes)
+	Der "Klebstoff". Ermöglicht Designern und Nicht-Programmierern, Arena-Fallen oder Umgebungseffekte zu erstellen, ohne den Java-Code neu kompilieren zu müssen.
+	3.1 Interaktion zwischen Plugins und Assets
+Ein häufiges Missverständnis ist, dass Plugins und Assets isoliert existieren. In der Realität interagieren sie eng. Unser Java-Plugin wird beispielsweise auf Data Assets zugreifen, um zu wissen, welches Schwert dem Spieler im "Warrior Kit" gegeben werden soll. Gleichzeitig kann das Plugin Ereignisse auslösen, auf die Visual Scripts in der Welt reagieren (z.B. das Öffnen von Toren, wenn das Match beginnt).
+________________
+4. Technische Voraussetzungen und Einrichtung der Entwicklungsumgebung
+Bevor die erste Zeile Code geschrieben wird, muss die Entwicklungsumgebung rigoros konfiguriert werden, um den Hytale-Server-Spezifikationen zu entsprechen. Dies ist kein trivialer Schritt, da die Verwendung von Java 25 spezifische Toolchains erfordert.
+4.1 Installation des JDK 25
+Die Server-Binärdatei HytaleServer.jar benötigt zwingend eine Java 25 Laufzeitumgebung.
+* Aktion: Herunterladen von OpenJDK 25 (LTS) von Adoptium oder einem vergleichbaren Anbieter.
+* Verifikation: Ausführen von java --version im Terminal.
+   * Erwartete Ausgabe: openjdk 25.0.1 2025-10-21 LTS (oder neuer).6
+* IDE-Konfiguration: IntelliJ IDEA oder Eclipse müssen auf das "Language Level 25" eingestellt sein, um Preview-Features zu unterstützen, falls diese in den Server-Flags aktiviert sind.
+4.2 Das Gradle-Build-System
+Wir verwenden Gradle für das Abhängigkeitsmanagement. Da die Hytale-API zum Zeitpunkt des Early Access möglicherweise nicht auf Maven Central gehostet wird, sondern über ein benutzerdefiniertes Hypixel/Hytale-Repository oder durch lokales Referenzieren der Server-Binärdatei eingebunden wird, muss die build.gradle.kts entsprechend konfiguriert werden.9
+Beispiel build.gradle.kts (Kotlin DSL):
+
+
+Kotlin
+
+
+
+
+plugins {
+   java
+   id("io.hytale.plugin") version "1.0.0" // Hypothetischer Plugin-Wrapper
+}
+
+group = "com.deinname.hytale"
+version = "1.0.0-SNAPSHOT"
+
+repositories {
+   mavenCentral()
+   maven("https://repo.hytale.com/public/") // Offizielles Repo (hypothetisch)
+}
+
+dependencies {
+   // Die Kern-API, die uns Zugriff auf Events, Entities und Welt-Logik gibt
+   compileOnly("com.hytale:hytale-server-api:1.0.0") 
+   
+   // Google Gson für JSON-Verarbeitung (Standard in Hytale)
+   implementation("com.google.code.gson:gson:2.10.1")
+}
+
+java {
+   toolchain {
+       languageVersion.set(JavaLanguageVersion.of(25))
+   }
+}
+
+tasks.withType<JavaCompile> {
+   options.encoding = "UTF-8"
+}
+
+4.3 Das hytale.json Manifest
+Jedes Hytale-Plugin benötigt eine Manifest-Datei, ähnlich der plugin.yml in Bukkit, jedoch im JSON-Format. Diese Datei teilt dem Server mit, wie die Mod geladen werden soll, welche Abhängigkeiten bestehen und welche Berechtigungen registriert werden müssen.4
+src/main/resources/hytale.json:
+
+
+JSON
+
+
+
+
+{
+ "schemaVersion": 1,
+ "name": "DuelMaster",
+ "id": "duel_master",
+ "version": "1.0.0",
+ "main": "com.deinname.duelmaster.DuelMasterPlugin",
+ "description": "Ein vollfunktionsfähiges 1v1 Deathmatch System für Hytale.",
+ "dependencies": {
+     "hytale-common": "1.0.0"
+ },
+ "permissions":
+}
+
+________________
+5. API-Architektur: Das Hytale Objektmodell
+Um die Modifikation zu erstellen, müssen wir die Struktur der Hytale Server API dekonstruieren. Basierend auf den Recherchen teilt die API eine konzeptionelle Abstammung mit Bukkit/Spigot (aufgrund der Hypixel-Historie), nutzt aber moderne Patterns wie Codecs und Komponenten.10
+5.1 Der Einstiegspunkt: JavaPlugin
+Die Hauptklasse erweitert JavaPlugin (oder ein Äquivalent wie HytalePlugin). Diese Klasse ist verantwortlich für das Lebenszyklusmanagement (onEnable, onDisable) und die Initialisierung der Konfigurationen.7
+
+
+Java
+
+
+
+
+package com.deinname.duelmaster;
+
+import com.hytale.api.plugin.JavaPlugin;
+import com.hytale.api.event.Listener;
+import com.hytale.api.config.Config;
+// Weitere Importe...
+
+public class DuelMasterPlugin extends JavaPlugin {
+   
+   private ArenaManager arenaManager;
+   private Config<DuelConfig> config;
+
+   @Override
+   public void onEnable() {
+       // Initialisierung der Konfiguration mittels Hytales Codec-System
+       // Dies lädt oder erstellt config/duel_master/config.json
+       this.config = this.withConfig("duel_config", DuelConfig.CODEC);
+       
+       // Initialisierung der Manager-Klassen
+       this.arenaManager = new ArenaManager(this);
+       
+       // Registrierung der Event-Listener
+       this.getEventManager().registerEvents(new DuelListener(this), this);
+       
+       // Registrierung der Befehle
+       this.getCommandManager().register("duel", new DuelCommand(this));
+       
+       getLogger().info("DuelMaster wurde erfolgreich für Hytale Early Access aktiviert!");
+   }
+
+   @Override
+   public void onDisable() {
+       // Aufräumarbeiten: Laufende Matches beenden, Arenen zurücksetzen
+       if (arenaManager!= null) {
+           arenaManager.shutdown();
+       }
+   }
+   
+   public ArenaManager getArenaManager() {
+       return arenaManager;
+   }
+   
+   public DuelConfig getConfigData() {
+       return config.get();
+   }
+}
+
+5.2 Das Konfigurationssystem (Codecs)
+Im Gegensatz zum einfachen, aber fehleranfälligen YAML der Vergangenheit, nutzt Hytale Codecs für typsichere Konfigurationen. Dies stellt sicher, dass, wenn die Konfigurationsdatei fehlerhaft ist, der Server dies bereits beim Start abfängt und nicht erst zur Laufzeit abstürzt.12
+Konfigurationsklasse DuelConfig.java:
+
+
+Java
+
+
+
+
+import com.hytale.api.codec.BuilderCodec;
+import com.hytale.api.codec.Codec;
+import com.hytale.api.codec.KeyedCodec;
+
+public class DuelConfig {
+   // Definition des Codecs für Serialisierung/Deserialisierung
+   public static final BuilderCodec<DuelConfig> CODEC = BuilderCodec.builder(DuelConfig.class, DuelConfig::new)
+      .append(new KeyedCodec<Integer>("matchDurationSeconds", Codec.INT), 
+              (conf, val, info) -> conf.matchDuration = val, 
+              (conf, info) -> conf.matchDuration)
+      .append(new KeyedCodec<String>("lobbyWorldName", Codec.STRING),
+              (conf, val, info) -> conf.lobbyWorld = val,
+              (conf, info) -> conf.lobbyWorld)
+      .append(new KeyedCodec<Double>("eloKFactor", Codec.DOUBLE),
+              (conf, val, info) -> conf.eloKFactor = val,
+              (conf, info) -> conf.eloKFactor)
+      .build();
+
+   // Konfigurationsvariablen mit Standardwerten
+   public int matchDuration = 300;
+   public String lobbyWorld = "hub";
+   public double eloKFactor = 32.0;
+}
+
+Dieser Ansatz spiegelt die Modernisierung wider: Statt loser Typisierung haben wir strikte Verträge über die Datenstruktur.
+________________
+6. Architektur-Design: Das 1v1 Deathmatch System
+Ein robuster 1v1-Modus erfordert mehr als nur das Teleportieren zweier Spieler an denselben Ort. Es erfordert einen Zustandsautomaten (State Machine), um den Lebenszyklus eines Matches zu verwalten, ein Arena-Management-System für den physischen Raum und ein Kit-System für Fairness.
+6.1 System-Module
+1. Arena Manager: Verwaltet das Laden, Entladen und Zurücksetzen von Arena-Instanzen.
+2. Match Manager: Verwaltet die Logik eines aktiven Duells (Timer, Punktestand, Kill-Erkennung).
+3. Queue System: Verwaltet Spieler, die auf ein Match warten (ELO-basierte Matchmaking-Logik).
+4. Inventory/Kit Manager: Speichert Spielerinventare vor dem Match und stellt sie danach wieder her (Snapshotting).
+6.2 Die Zustandsmaschine (State Machine)
+Jedes Duell folgt einer strikten Abfolge von Zuständen. Wir definieren diese als Enum oder Sealed Interface, um Typensicherheit zu gewährleisten.
+* WAITING: Die Arena ist leer, sauber und bereit für neue Spieler.
+* STARTING: Spieler sind teleportiert, eingefroren (Movement Speed = 0), und ein Countdown (3..2..1) läuft.
+* FIGHTING: Barrieren fallen, PvP wird aktiviert (EntityDamageByEntityEvent erlaubt), Schaden wird getrackt.
+* ENDING: Ein Spieler ist tot oder die Zeit ist abgelaufen. Der Gewinner wird ermittelt und verkündet.
+* RESETTING: Spieler werden evakuiert, Arena-Blöcke wiederhergestellt, liegengebliebene Items (Drops) entfernt.
+6.3 Instanz-Management vs. Welt-Management
+In Hytale sind "Welten" ressourcenintensive Objekte. Für ein 1v1-System wollen wir nicht für jedes Duell eine riesige, geländegenerierte Welt laden. Stattdessen nutzen wir Void Worlds (Leere Welten) mit Prefabs oder Instanzen.13
+* Ansatz: Wir halten eine "Template"-Arenawelt vor.
+* Ausführung: Wenn ein Match beginnt, kopieren wir entweder die spezifischen Chunk-Daten in eine dynamische Instanz oder nutzen Koordinaten-Offsets in einer einzigen "Matches"-Dimension.
+* Optimierung: Die Nutzung von Koordinaten-Offsets (Arena 1 bei 0,0; Arena 2 bei 1000,0) in einer Void-Welt ist speichereffizienter als das Erstellen von 50 separaten World-Objekten, solange die Chunks entladen werden, wenn keine Matches laufen.
+________________
+7. Implementierung: Der Code
+Hier konstruieren wir die Kernlogik. Wir nutzen Event-Listener, Scheduler und die Hytale-API-Methoden, wie sie in den Snippets angedeutet wurden.
+7.1 Die Arena-Klasse (Datenstruktur)
+Diese Klasse hält den Zustand eines einzelnen Kampfplatzes.
+
+
+Java
+
+
+
+
+package com.deinname.duelmaster.game;
+
+import com.hytale.api.world.Location;
+import java.util.UUID;
+import java.util.List;
+
+public class Arena {
+   private final String id;
+   private final Location spawnPointA;
+   private final Location spawnPointB;
+   private GameState state;
+   private UUID playerA;
+   private UUID playerB;
+   private int timer;
+
+   public Arena(String id, Location a, Location b) {
+       this.id = id;
+       this.spawnPointA = a;
+       this.spawnPointB = b;
+       this.state = GameState.WAITING;
+   }
+
+   public String getId() { return id; }
+   
+   public GameState getState() { return state; }
+   public void setState(GameState state) { this.state = state; }
+
+   public boolean containsPlayer(UUID playerId) {
+       return (playerA!= null && playerA.equals(playerId)) |
+
+| 
+              (playerB!= null && playerB.equals(playerId));
+   }
+
+   // Startet das Match und initialisiert die Spieler
+   public void startMatch(Player p1, Player p2) {
+       this.playerA = p1.getUniqueId();
+       this.playerB = p2.getUniqueId();
+       this.state = GameState.STARTING;
+       this.timer = 5; // 5 Sekunden Countdown
+       
+       // Teleportationslogik
+       p1.teleport(spawnPointA);
+       p2.teleport(spawnPointB);
+       
+       // Inventar und Status zurücksetzen
+       preparePlayer(p1);
+       preparePlayer(p2);
+       
+       // UI Benachrichtigung (Titles)
+       p1.sendTitle("Duell startet!", "Gegen " + p2.getName());
+       p2.sendTitle("Duell startet!", "Gegen " + p1.getName());
+   }
+   
+   private void preparePlayer(Player p) {
+       p.setHealth(p.getMaxHealth());
+       p.getFoodData().setFoodLevel(20);
+       p.getInventory().clear(); // [15]
+       // Hier würde das Kit geladen werden
+   }
+}
+
+7.2 Der Duel Command (/duel)
+Dieser Befehl handhabt die Benutzerinteraktion. Wir müssen prüfen, ob der Spieler existiert, ob er online ist und ob er sich nicht selbst herausfordert.16
+
+
+Java
+
+
+
+
+package com.deinname.duelmaster.commands;
+
+import com.hytale.api.command.CommandExecutor;
+import com.hytale.api.command.CommandSender;
+import com.hytale.api.entity.Player;
+import com.hytale.api.ChatColor;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
+
+public class DuelCommand implements CommandExecutor {
+   private final DuelMasterPlugin plugin;
+   // Speichert offene Anfragen: Ziel -> Herausforderer
+   private final Map<UUID, UUID> pendingRequests = new HashMap<>();
+
+   public DuelCommand(DuelMasterPlugin plugin) {
+       this.plugin = plugin;
+   }
+
+   @Override
+   public boolean onCommand(CommandSender sender, Command cmd, String label, String args) {
+       if (!(sender instanceof Player)) {
+           sender.sendMessage("Nur Spieler können diesen Befehl nutzen.");
+           return true;
+       }
+       Player challenger = (Player) sender;
+
+       // Argumentprüfung
+       if (args.length < 1) {
+           challenger.sendMessage(ChatColor.RED + "Verwendung: /duel <spieler>");
+           return true;
+       }
+
+       // Zielspieler finden
+       Player target = plugin.getServer().getPlayer(args);
+       if (target == null) {
+           challenger.sendMessage(ChatColor.RED + "Spieler nicht gefunden.");
+           return true;
+       }
+
+       // Selbst-Duell verhindern
+       if (target.getUniqueId().equals(challenger.getUniqueId())) {
+           challenger.sendMessage(ChatColor.RED + "Du kannst dich nicht selbst duellieren.");
+           return true;
+       }
+
+       // Anfrage speichern
+       pendingRequests.put(target.getUniqueId(), challenger.getUniqueId());
+       
+       // Nachrichten senden
+       target.sendMessage(ChatColor.GOLD + challenger.getName() + " hat dich zum Duell gefordert! Tippe /accept, um zu kämpfen.");
+       challenger.sendMessage(ChatColor.GREEN + "Duell-Anfrage an " + target.getName() + " gesendet.");
+       
+       return true;
+   }
+}
+
+7.3 Die Kernlogik: Schaden und Tod
+Hier lebt die eigentliche "Deathmatch"-Funktionalität. Wir müssen uns in das EntityDamageEvent (oder Hytale-Äquivalent) einklinken, um die Gesundheit zu überwachen und Gewinner zu deklarieren.10 Besonders wichtig ist die Unterscheidung zwischen echtem Tod (Respawn-Bildschirm) und simuliertem Tod für das Minigame.
+
+
+Java
+
+
+
+
+package com.deinname.duelmaster.listeners;
+
+import com.hytale.api.event.Listener;
+import com.hytale.api.event.EventHandler;
+import com.hytale.api.event.entity.EntityDamageByEntityEvent;
+import com.hytale.api.event.entity.PlayerDeathEvent;
+import com.hytale.api.entity.Player;
+
+public class DuelListener implements Listener {
+   private final DuelMasterPlugin plugin;
+
+   public DuelListener(DuelMasterPlugin plugin) {
+       this.plugin = plugin;
+   }
+
+   @EventHandler
+   public void onDamage(EntityDamageByEntityEvent event) {
+       // Prüfen, ob beide Entitäten Spieler sind
+       if (!(event.getEntity() instanceof Player) ||!(event.getDamager() instanceof Player)) return;
+
+       Player victim = (Player) event.getEntity();
+       Player attacker = (Player) event.getDamager();
+
+       // Arena des Opfers abrufen
+       Arena arena = plugin.getArenaManager().getArena(victim);
+       
+       // Fall 1: Spieler ist nicht in einer Arena -> Lobby-Schutz aktivieren?
+       if (arena == null) {
+           // Hier könnte man prüfen, ob PvP in der Welt allgemein erlaubt ist
+           // Für dieses Beispiel deaktivieren wir PvP außerhalb von Arenen
+           event.setCancelled(true);
+           return;
+       }
+
+       // Fall 2: Spieler ist in Arena, aber das Match läuft nicht (z.B. Countdown)
+       if (arena.getState()!= GameState.FIGHTING) {
+           event.setCancelled(true);
+       }
+       
+       // Fall 3: Match läuft -> Schaden zulassen. 
+       // Hytale übernimmt die Schadensberechnung, Rüstungsreduktion etc. automatisch.
+   }
+
+   @EventHandler
+   public void onDeath(PlayerDeathEvent event) {
+       Player loser = event.getEntity();
+       Arena arena = plugin.getArenaManager().getArena(loser);
+
+       if (arena!= null) {
+           // WICHTIG: Wir brechen das eigentliche Todes-Event ab oder manipulieren es,
+           // um den Respawn-Bildschirm zu vermeiden und sofortiges Zurücksetzen zu ermöglichen.
+           event.setCancelled(true); // "Fake"-Tod
+           event.getDrops().clear(); // Keine Items fallen lassen
+           
+           // Match beenden Logik aufrufen
+           plugin.getArenaManager().endMatch(arena, loser);
+       }
+   }
+}
+
+7.4 Die endMatch Logik
+Diese Methode ist kritisch. Sie muss das Aufräumen sauber handhaben, um "Ghost"-Zustände zu vermeiden, in denen ein Spieler in einer Arena feststeckt oder sein Inventar verliert.
+
+
+Java
+
+
+
+
+public void endMatch(Arena arena, Player loser) {
+   // Gewinner ermitteln
+   UUID winnerId = arena.getPlayerA().equals(loser.getUniqueId())? arena.getPlayerB() : arena.getPlayerA();
+   Player winner = plugin.getServer().getPlayer(winnerId);
+   
+   // Ergebnisse verkünden
+   if (winner!= null) {
+       winner.sendTitle(ChatColor.GOLD + "SIEG", "Du hast das Duell gewonnen!");
+       winner.playSound(winner.getLocation(), "hytale:ui.challenge_complete", 1f, 1f);
+       // Elo Update Logik hier einfügen
+   }
+   loser.sendTitle(ChatColor.RED + "NIEDERLAGE", "Viel Glück beim nächsten Mal.");
+
+   // Status ändern
+   arena.setState(GameState.RESETTING);
+   
+   // Teleport zurück zur Lobby
+   Location lobby = plugin.getConfigData().getLobbyLocation();
+   
+   // Inventare wiederherstellen (aus dem Snapshot)
+   if (winner!= null) {
+       plugin.getInventoryManager().restoreInventory(winner);
+       winner.teleport(lobby);
+       winner.setHealth(winner.getMaxHealth());
+   }
+   plugin.getInventoryManager().restoreInventory(loser);
+   loser.teleport(lobby);
+   loser.setHealth(loser.getMaxHealth());
+
+   // Arena freigeben
+   arena.reset(); // Setzt Variablen auf null, repariert Blöcke wenn nötig
+}
+
+________________
+8. Fortgeschrittene Integration: Daten-Assets und Visual Scripting
+Während das Java-Plugin die Logik steuert, definiert Hytale den Inhalt über JSON-Dateien. Um ein echtes "Hytale-Gefühl" zu erzeugen, sollten wir nicht nur Vanilla-Items verwenden, sondern benutzerdefinierte Kits erstellen.
+8.1 Data Assets: Das Duellanten-Kit
+Wir definieren ein Kit in JSON. Dies könnte eine Datei wie assets/duelmaster/kits/gladiator.json sein (hypothetischer Pfad basierend auf 3).
+
+
+JSON
+
+
+
+
+{
+ "id": "duelmaster:gladiator_kit",
+ "items": [
+   {
+     "item": "hytale:iron_sword",
+     "slot": 0,
+     "amount": 1,
+     "nbt": {
+       "Unbreakable": true,
+       "display": { "Name": "Gladius" }
+     }
+   },
+   {
+     "item": "hytale:shield",
+     "slot": 1,
+     "amount": 1
+   },
+   {
+     "item": "hytale:healing_potion",
+     "slot": 2,
+     "amount": 3
+   }
+ ],
+ "armor": {
+   "chest": "hytale:iron_chestplate",
+   "legs": "hytale:chainmail_leggings"
+ }
+}
+
+Unser Java-Plugin würde dann einen KitLoader implementieren, der diese JSON-Datei parst und die Items in das Inventar des Spielers legt (player.getInventory().addItem(...)).
+8.2 Visual Scripting Integration
+Obwohl wir den Kern in Java schreiben, bietet Hytale ein visuelles Skripting-System (inspiriert von Unreal Blueprints) für Map-Designer.3
+* Anwendungsfall: Eine Arena mit einer "Lava-Falle", die durch einen Hebel aktiviert wird.
+* Implementierung: Statt die Hebel-Logik mühsam in Java anhand von Blockkoordinaten zu codieren, erstellt der Map-Designer ein Prefab mit einem visuellen Skript.
+* Java Hook: Das Java-Plugin kann auf globale Signale oder ScriptEvent hören. Wenn das Visual Script feuert, kann das Plugin den Spielern eine Warnmeldung senden ("ACHTUNG: FALLE AKTIVIERT!"). Dies zeigt die Stärke der hybriden Entwicklung: Design in Visual Scripting, komplexe Spiellogik in Java.
+________________
+9. Datenpersistenz und das Elo-Rating-System
+Um den Modus "kompetitiv" zu gestalten, benötigen wir ein System zur Bewertung der Spielerfähigkeiten.
+9.1 Daten-Speicherungsstrategie
+* Option A (Einfach): JSON-Dateien in plugin_data/DuelMaster/players/. Einfach zu lesen, aber bei >10.000 Spielern langsam (I/O-Blocking).
+* Option B (Professionell): SQLite oder H2 Datenbank. Da Hytale Server-seitig läuft, können wir JDBC-Treiber nutzen.
+* Entscheidung: Wir verwenden für das MVP eine JSON-Speicherung, abstrahieren den Zugriff aber hinter einem StorageProvider Interface, um später auf SQL wechseln zu können.
+9.2 Der Elo-Algorithmus
+Der Elo-Algorithmus berechnet die Gewinnwahrscheinlichkeit und passt die Bewertung basierend auf dem tatsächlichen Ergebnis an.
+Mathematische Formel:
+
+
+
+
+$$E_A = \frac{1}{1 + 10^{(R_B - R_A) / 400}}$$
+
+
+Wo $E_A$ die erwartete Punktzahl für Spieler A ist, $R_A$ das Rating von Spieler A und $R_B$ das Rating von Spieler B.
+Die neue Bewertung berechnet sich dann:
+
+
+
+
+$$R'_A = R_A + K \cdot (S_A - E_A)$$
+
+
+Wo $K$ der K-Faktor ist (z.B. 32) und $S_A$ das tatsächliche Ergebnis (1 für Sieg, 0 für Niederlage).
+Java-Implementierung:
+
+
+Java
+
+
+
+
+public class EloCalculator {
+   private static final int K_FACTOR = 32;
+
+   public static int calculateNewRating(int currentRating, int opponentRating, boolean won) {
+       double expectedScore = 1.0 / (1.0 + Math.pow(10, (opponentRating - currentRating) / 400.0));
+       double actualScore = won? 1.0 : 0.0;
+       return (int) (currentRating + K_FACTOR * (actualScore - expectedScore));
+   }
+}
+
+Wenn ein Match endet (endMatch), rufen wir diese Methode ab, berechnen die neuen Ratings und speichern sie asynchron über den StorageProvider.
+________________
+10. Bereitstellung, Sicherheit und Performance-Tuning
+10.1 Authentifizierung (OAuth 2.0)
+Hytale-Server erfordern eine Authentifizierung, um mit der Master-List zu kommunizieren und Spieler-Skins zu validieren.18
+* Ablauf: Der Server-Administrator führt beim ersten Start /auth login device aus.
+* Token-Management: Der Server erhält ein sessionToken und ein identityToken. Diese Tokens authorisieren den Server, Spieler zu validieren.
+* Plugin-Rolle: Unser Mod muss sicherstellen, dass er Statistiken (Elo) an die UUID des Spielers bindet, die vom authentifizierten Profil (player.getProfile().getUuid()) stammt, nicht am Spielernamen, da Namen geändert werden können.19
+10.2 Garbage Collection Tuning für Java 25
+Hytale generiert viele kurzlebige Objekte (Vektoren, Events). In einem schnellen 1v1-Modus sind "Lag Spikes" durch Garbage Collection tödlich.
+* Empfehlung: Nutzung des ZGC (Z Garbage Collector), der in Java 25 weiter optimiert wurde. Er ist darauf ausgelegt, Pausenzeiten unter 1ms zu halten, unabhängig von der Heap-Größe.
+* Start-Parameter: java -Xmx8G -XX:+UseZGC -XX:+ZGenerational -jar HytaleServer.jar
+10.3 Hosting und Latenz
+Da Hytale eine serverseitige Treffererkennung (Server-side Hit Detection) mit Rückspulung (Lag Compensation) verwendet, ist eine stabile CPU-Taktrate wichtiger als die Anzahl der Kerne.
+* Hosting-Anforderungen: Für 50 gleichzeitige 1v1-Matches (100 Spieler) empfehlen wir einen Prozessor mit hoher Single-Core-Performance (z.B. Ryzen 9 oder Intel Core i9 neuerer Generationen) und NVMe-Speicher für schnelles Laden der Arena-Prefabs.20
+________________
+11. Fazit und Ausblick
+Dieser Bericht hat die architektonischen und praktischen Schritte zur Erstellung einer vollfunktionsfähigen 1v1-Deathmatch-Mod für Hytale dargelegt. Durch die Nutzung des Java 25-Ökosystems, der Server-Side Assets und der Event-Driven API können wir ein Erlebnis schaffen, das sich wie ein nativer Spielmodus anfühlt und nicht wie ein "zusammengeschustertes" Add-on.
+Der Übergang vom Client-lastigen Modding (Minecraft) zum server-autoritativen Modell von Hytale stellt eine massive Chance für Entwickler dar. Wir müssen uns keine Sorgen mehr über den Installationsstatus des Clients machen. Wenn der Code auf dem Server läuft, existiert das Feature für den Spieler. Dies senkt die Einstiegshürde für Spieler erheblich und ermöglicht eine schnelle Iteration von Spielmodi.
+Während sich Hytale durch den Early Access entwickelt, wird die API zweifellos erweitert werden, insbesondere in den Bereichen benutzerdefinierte Entity-KI und fortschrittliche Shader-Steuerung. Die grundlegenden Prinzipien jedoch – Event-Handling, ECS-Management und robuste State Machines – werden das Fundament des Server-Engineerings bleiben.
+Empfohlene nächste Schritte für die Implementierung:
+1. Repository klonen: Einrichten des Gradle-Projekts mit der hytale-server-api Abhängigkeit.
+2. Asset-Erstellung: Verwendung von Blockbench zur Erstellung eines benutzerdefinierten "Sieger-Pokals" als Art Asset.22
+3. Map-Design: Nutzung der Kreativ-Tools von Hytale, um eine spezialisierte 1v1-Arena zu bauen und als Prefab zu speichern.23
+4. Codierung: Implementierung des ArenaManager und DuelListener wie in Abschnitt 7 beschrieben.
+5. Testen: Bereitstellung auf einem lokalen localhost-Server, Verbinden zweier Clients (unter Nutzung der Multi-Instanz-Fähigkeit von Hytale) und Verifizierung der Zustandsübergänge.
+________________
+Anhang A: Vollständiges plugin.json Manifest Referenz
+
+
+JSON
+
+
+
+
+{
+ "schemaVersion": 1,
+ "id": "duel_master",
+ "name": "DuelMaster",
+ "version": "1.0.0",
+ "author": "HytaleDev",
+ "entry": "com.hytalemodding.duelmaster.DuelMaster",
+ "dependencies": {
+   "hytale-common": "1.0.0"
+ },
+ "permissions": {
+   "duel_master.player": {
+     "description": "Erlaubt grundlegende Duell-Funktionen",
+     "default": true
+   },
+   "duel_master.admin": {
+     "description": "Admin-Befehle wie /arena create",
+     "default": "op"
+   }
+ }
+}
+
+Anhang B: Kit-Management-Logik (Java Helper)
+
+
+Java
+
+
+
+
+public void giveKit(Player player) {
+   Inventory inv = player.getInventory();
+   inv.clear(); // [15]
+   
+   // Erstellen des Schwerts mit dem hypothetischen ItemBuilder
+   ItemStack sword = ItemBuilder.of("hytale:iron_sword")
+      .withDisplayName(ChatColor.RED + "Duellanten-Klinge")
+      .withAttribute(Attribute.ATTACK_DAMAGE, 10)
+      .build();
+       
+   // Bogen und Pfeile
+   ItemStack bow = ItemBuilder.of("hytale:longbow").build();
+   ItemStack arrows = ItemBuilder.of("hytale:arrow").setAmount(32).build();
+   
+   // Rüstung anlegen
+   player.getEquipment().setChestplate(ItemBuilder.of("hytale:iron_chestplate").build());
+   player.getEquipment().setLeggings(ItemBuilder.of("hytale:chainmail_leggings").build());
+   
+   // Items ins Inventar legen
+   inv.addItem(sword);
+   inv.addItem(bow);
+   inv.addItem(arrows);
+   
+   // Statuseffekte anwenden (Regeneration vor dem Kampf)
+   player.addEffect(new StatusEffect("hytale:regeneration", 20 * 10, 1));
+}
+
+Referenzen
+1. Zugriff am Januar 14, 2026, https://en.wikipedia.org/wiki/Hytale
+2. Hytale is finally here!, Zugriff am Januar 14, 2026, https://hytale.com/news/2026/1/hytale-is-finally-here
+3. How Does Hytale Modding Work? Everything We Know So Far | Wabbanode, Zugriff am Januar 14, 2026, https://wabbanode.com/blog/hytale/how-does-hytale-modding-work
+4. HytaleModding/site: Hytale Modding Website - your one ... - GitHub, Zugriff am Januar 14, 2026, https://github.com/HytaleModding/site
+5. Hytale Modding - CurseForge Support, Zugriff am Januar 14, 2026, https://support.curseforge.com/en/support/solutions/articles/9000273178-hytale-modding
+6. Hytale Server Manual – Hypixel Studios - Hytale Support, Zugriff am Januar 14, 2026, https://support.hytale.com/hc/en-us/articles/45326769420827-Hytale-Server-Manual
+7. [GUIDE] How to create your own Bukkit/Spigot plugins (For Beginners)! | Hypixel Forums, Zugriff am Januar 14, 2026, https://hypixel.net/threads/guide-how-to-create-your-own-bukkit-spigot-plugins-for-beginners.391996/
+8. Hytale Modding Strategy and Status, Zugriff am Januar 14, 2026, https://hytale.com/news/2025/11/hytale-modding-strategy-and-status
+9. I made a 2 minute tutorial for your first Hytale server plugin (Java) : r ..., Zugriff am Januar 14, 2026, https://www.reddit.com/r/hytale/comments/1qc05ww/i_made_a_2_minute_tutorial_for_your_first_hytale/
+10. EntityDamageItemEvent (paper-api 1.21.11-R0.1-SNAPSHOT API) - PaperMC, Zugriff am Januar 14, 2026, https://jd.papermc.io/paper/1.21.11/io/papermc/paper/event/entity/EntityDamageItemEvent.html
+11. Class EntityDamageByEntityEvent - SpigotMC Developer Hub, Zugriff am Januar 14, 2026, https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/entity/EntityDamageByEntityEvent.html
+12. Custom Config Files: CurseForge support, Zugriff am Januar 14, 2026, https://support.curseforge.com/en/support/solutions/articles/9000273187-custom-config-files
+13. How to Upload a Singleplayer World to Your Hytale Server | Setup - Nodecraft, Zugriff am Januar 14, 2026, https://nodecraft.com/support/games/hytale/setup/how-to-upload-a-singleplayer-world-to-your-hytale-server
+14. Hope this is worth it : r/hytale - Reddit, Zugriff am Januar 14, 2026, https://www.reddit.com/r/hytale/comments/1po0z1f/hope_this_is_worth_it/
+15. [Bukkit] Making Plugins - by Hutchmaster99 | Hypixel Forums, Zugriff am Januar 14, 2026, https://hypixel.net/threads/bukkit-making-plugins-by-hutchmaster99.20075/
+16. EntityDamageEvent (Spigot-API 1.21.11-R0.1-SNAPSHOT API) - SpigotMC Developer Hub, Zugriff am Januar 14, 2026, https://hub.spigotmc.org/javadocs/spigot/org/bukkit/event/entity/EntityDamageEvent.html
+17. Server Provider Authentication Guide – Hypixel Studios - Hytale Support, Zugriff am Januar 14, 2026, https://support.hytale.com/hc/en-us/articles/45328341414043-Server-Provider-Authentication-Guide
+18. How to Upload Singleplayer Player Data to Your Hytale Server | Setup - Nodecraft, Zugriff am Januar 14, 2026, https://nodecraft.com/support/games/hytale/setup/how-to-import-singleplayer-player-data-to-your-hytale-server
+19. Hytale Modding And World Systems: How They Change Server Hosting Requirements, Zugriff am Januar 14, 2026, https://pinehosting.com/blog/hytale-modding-and-world-systems-how-they-change-server-hosting-requirements/
+20. Hytale Server Hosting - Kinetic Hosting, Zugriff am Januar 14, 2026, https://www.kinetichosting.com/game-servers/hytale/order
+21. What you need to know to start Modding when it comes! : r/hytale - Reddit, Zugriff am Januar 14, 2026, https://www.reddit.com/r/hytale/comments/1peez7n/what_you_need_to_know_to_start_modding_when_it/
+22. Deep Dive into Hytale's Creative Mode | Game Information - Nodecraft, Zugriff am Januar 14, 2026, https://nodecraft.com/support/games/hytale/game-information/deep-dive-into-hytale-s-creative-mode

@@ -1,0 +1,162 @@
+---
+title: "05 - Kontrollfluss: Schleifen"
+description: Lerne, wie man Code mithilfe von Schleifen effizient wiederholt
+---
+
+Schleifen erlauben es dir, Code zu wiederholen ohne ihn wiederholt schreiben zu müssen. Sie sind unentbehrlich, um Sammlungen zu verarbeiten, Welten zu generieren und Spielobjekte zu aktualisieren.
+
+## While-Schleife
+
+Wiederholt Code, solange eine Bedingung wahr ist:
+
+```java tab="Code"
+int countdown = 5;
+
+while (countdown > 0) {
+    System.out.println(countdown);
+    countdown--;
+}
+System.out.println("Ende!");
+```
+
+```java tab="Output"
+5
+4
+3
+2
+1
+Ende!
+```
+
+### Struktur
+
+```java
+while (Bedingung) {
+    // zu wiederholender Code
+}
+```
+
+<Callout type="warning" title="Endlose Schleifen">
+  Gehe immer sicher, dass deine Schleifenbedingung irgendwann falsch wird sonst läuft dein Programm immer weiter!
+
+  ```java tab="Bad Example"
+  int x = 0;
+  while (x < 10) {
+      System.out.println("Endlosschleife!");
+      // Du musst x erhöhen!
+  }
+  ```
+
+  ```java tab="Good Example"
+  int x = 0;
+  while (x < 10) {
+      System.out.println("x ist gerade: " + x);
+      x++; // Erhöht x! // [!code ++]
+  }
+  ```
+</Callout>
+
+## Do-While-Schleife
+
+Wie eine While-Schleife, aber läuft mindestens einmal:
+
+```java
+int leben = 0;
+
+do {
+    System.out.println("Versucht respawn...");
+    leben = 100;
+} while (leben <= 0);
+```
+
+## For-Schleife
+
+Am besten, wenn du weißt, wie oft du sie wiederholen möchtest:
+
+```java tab="Code"
+for (int i = 1; i <= 5; i++) {
+    System.out.println("Level " + i);
+}
+```
+
+```java tab="Output"
+Level 1
+Level 2
+Level 3
+Level 4
+Level 5
+```
+
+### Struktur
+
+```java
+for (Initialisierung; Bedingung; Update) {
+    // zu wiederholender Code
+}
+```
+
+<Callout type="info" title="Teile der For-Schleife">
+  ```java
+  for (int i = 0; i < 10; i++) {
+  //   ^         ^        ^
+  //   Start     Stop     Schritt
+  }
+  ```
+
+  * **Initialisierung**: int i = 0 - Läuft einmal am Anfang
+  * **Bedingung**: i < 10 - Überprüft vor jeder Schleife
+  * **Update**: i++ - Läuft nach jeder Schleife
+</Callout>
+
+## Break Statement
+
+Du kannst eine Schleife frühzeitig mit `break` beenden:
+
+```java
+for (int i = 1; i <= 10; i++) {
+    if (i == 6) {
+        break; // Beendet die Schleife, wenn i 6 ist
+    }
+    System.out.println(i);
+}
+```
+
+## Continue Statement
+
+Springe zur nächsten Iteration mit `continue`:
+
+```java
+for (int i = 1; i <= 10; i++) {
+    if (i % 2 == 0) {
+        continue; // Überspringe gerade Zahlen
+    }
+    System.out.println(i); // Gibt nur ungerade Zahlen aus
+}
+```
+
+## Geschachtelte Schleifen
+
+Du kannst Schleifen in andere Schleifen schachteln:
+
+```java
+for (int i = 1; i <= 3; i++) {
+    for (int j = 1; j <= 2; j++) {
+        System.out.println("i: " + i + ", j: " + j);
+    }
+}
+```
+
+<Callout type="warning" title="Performance geschachtelter Schleifen">
+  Sei vorsichtig mit verschachtelten Schleifen! Sie können deine Mod erheblich verlangsamen.
+
+  ```java
+  // Dies läuft 1,000,000 mal!
+  for (int i = 0; i < 1000; i++) {
+      for (int j = 0; j < 1000; j++) {
+          // Code hier
+      }
+  }
+  ```
+
+  Versuche tief verschachtelte Schleifen bei der Verarbeitung großer Datenmengen zu vermeiden.
+</Callout>

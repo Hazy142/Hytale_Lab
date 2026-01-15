@@ -1,0 +1,46 @@
+plugins {
+    id 'java'
+}
+
+group = 'de.hazy'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // HytaleServer.jar als lokale Abhängigkeit im Classpath
+    compileOnly files('../2026.01.13-50e69c385/Server/HytaleServer.jar')
+}
+
+// Disable tests (keine Test-Dependencies konfiguriert)
+tasks.named('test') {
+    enabled = false
+}
+
+jar {
+    archiveBaseName = 'hazyPlugin'
+    archiveVersion = version
+    
+    // manifest.json aus resources wird automatisch inkludiert
+    manifest {
+        attributes(
+            'Plugin-Name': 'hazyPlugin',
+            'Plugin-Version': version,
+            'Main-Class': 'de.hazy.HazyPlugin'
+        )
+    }
+}
+
+// Plugin-JAR ins Server mods Verzeichnis kopieren
+task deployPlugin(type: Copy, dependsOn: jar) {
+    from jar.archiveFile
+    into '../2026.01.13-50e69c385/Server/mods'
+}

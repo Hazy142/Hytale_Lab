@@ -1,0 +1,126 @@
+---
+title: "03 - Kontrollfluss: If-Anweisungen"
+description: In diesem Abschnitt lernst du, wie du mit If-Anweisungen den Ablauf deines Java-Programms steuern kannst.
+---
+
+Programme müssen Entscheidungen treffen. If-Anweisungen ermöglichen deinem Programm, verschiedene Pfade aufgrund von Bedingungen zu wählen.
+
+## Einfache If-Anweisung
+
+Die einfachste Form überprüft eine Bedingung.
+
+```java
+int health = 20;
+
+if (health > 10) {
+    System.out.println("Du bist gesund!");
+}
+```
+
+### Aufbau
+
+```java
+if (bedingung) {
+    // code der ausgeführt wird, wenn die Bedingung true ist
+}
+```
+
+## If-Else-Anweisungen
+
+Wähle zwischen zwei Pfaden:
+
+```java
+int health = 5;
+
+if (health > 10) {
+    System.out.println("Du bist gesund!");
+} else {
+    System.out.println("Du musst dich heilen!");
+}
+```
+
+## Verkettung mehrerer If-Else-Anweisungen
+
+Überprüfe mehrere Bedingungen nacheinander:
+
+```java
+int health = 7;
+
+if (health > 15) {
+    System.out.println("Du bist in richtig guter Form!");
+} else if (health > 5) {
+    System.out.println("Du bist okay.");
+} else {
+    System.out.println("Du musst dich heilen!");
+}
+```
+
+## Verschachtelte If-Anweisungen
+
+Du kannst If-Anweisungen ineinander platzieren:
+
+```java
+int health = 12;
+
+if (health > 10) {
+    if (health > 15) {
+        System.out.println("Du bist in richtig guter Form!");
+    } else {
+        System.out.println("Du bist gesund!");
+    }
+} else {
+    System.out.println("Du musst dich heilen!");
+}
+```
+
+## Zusammengefasste Bedingungen
+
+Du kannst mehrere Bedingungen verbinden, mithilfe von Logik-Operatoren:
+
+```java
+// UND - beides muss true sein
+int health = 12;
+boolean hasPotion = true;
+
+if (health > 10 && hasPotion) {
+    System.out.println("Du bist gesund und hast einen Heilungstrank!");
+} else if (health > 10) {
+    System.out.println("Du bist gesund aber brauchst einen Heilungstrank!");
+} else {
+    System.out.println("Du musst dich heilen!");
+}
+
+// ODER - mindestens eine Bedingung muss true sein
+
+int health = 8;
+boolean hasPotion = false;
+if (health > 10 || hasPotion) {
+    System.out.println("Du bist entweder gesund oder hast einen Heilungstrank!");
+} else {
+    System.out.println("Du musst dich heilen und brauchst einen Heilungstrank!");
+}
+
+// NICHT - kehrt die Bedingung um
+
+int health = 8;
+if (!(health > 10)) {
+    System.out.println("Du musst dich heilen!");
+} else {
+    System.out.println("Du bist gesund!");
+}
+```
+
+## Der Ternary-Operator
+
+Ein kompakter Weg, um Werte zuzuweisen:
+
+```java
+int health = 12;
+String status = (health > 10) ? "Gesund" : "Du brauchst Heilung";
+```
+
+### Syntax
+
+```java
+variable = (bedingung) ? wertFallsWahr : wertFallsFalsch;
+```
