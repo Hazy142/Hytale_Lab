@@ -16,7 +16,7 @@ public class LivingOrbisPlugin extends Plugin {
         // In einer Produktionsumgebung sollte dieser Key niemals im Code stehen.
         // Best Practice: Laden aus Umgebungsvariablen oder einer config.yml.
         // Für dieses Beispiel implementieren wir den Key direkt, wie angefordert.
-        String apiKey = "AIzaSyAFU5y5cJNBedem1mZScxwxE4tDojuHmiI";
+        String apiKey = "YOUR-API-KEY";
 
         // Initialisierung des Service-Layers
         this.geminiService = new GeminiService(apiKey);
