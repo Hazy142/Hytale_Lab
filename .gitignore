@@ -8,6 +8,9 @@
 !docs/**
 !decompiled/
 !decompiled/**
+!jules_reverse_engineering/
+!jules_reverse_engineering/**
+!README.md
 !.gitignore
 
 # Re-ignore standard build artifacts (even in whitelisted folders)
@@ -16,3 +19,5 @@ build/
 *.class
 *.jar
 *.log
+__pycache__/
+*.pyc
