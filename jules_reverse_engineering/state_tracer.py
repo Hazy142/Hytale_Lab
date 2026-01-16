@@ -3,11 +3,17 @@
 State Machine Tracer for Hytale Game Phase Transitions
 Track and validate game state transitions to find race conditions
 
+⚠️ IMPORTANT NOTES ON VULNERABILITY DETECTION:
+- This module provides HEURISTIC/INDICATIVE detection of potential issues
+- "VULNERABILITY" results mean: "This transition violates the state machine"
+- They do NOT prove the server accepts these invalid transitions
+- Always verify findings against a live server before reporting
+
 This module provides:
 1. Game phase state tracking
-2. Valid/invalid transition detection
+2. Valid/invalid transition detection (based on spec)
 3. State diagram visualization
-4. Race condition identification
+4. Race condition identification (heuristic)
 """
 
 from enum import Enum
@@ -310,6 +316,17 @@ class StateTracer:
     def simulate_race_condition_test(self, test_scenario: str) -> Dict[str, Any]:
         """
         Simulate common race condition scenarios
+        
+        ⚠️ IMPORTANT: These are HEURISTIC tests that detect POTENTIAL vulnerabilities
+        based on state machine logic. They do NOT prove the server accepts invalid
+        transitions - that requires actual server testing.
+        
+        Use these results as:
+        - Indicators of where to focus testing
+        - Test cases for fuzzer development
+        - Validation of fuzzer logic
+        
+        To confirm a vulnerability, you MUST test against a live server.
         
         Test scenarios:
         - "auth_during_game": Send auth packet while in-game

@@ -47,10 +47,20 @@ class PacketCapture:
     """
     Live QUIC/UDP traffic capture & replay for fuzzing
     
-    Note: This is a simplified implementation using raw sockets.
-    For production use, consider using Scapy with:
-        pip install scapy
-    Then replace socket-based capture with scapy.sniff()
+    ⚠️ IMPORTANT LIMITATIONS:
+    - This uses UDP socket binding (not true packet sniffing)
+    - Will only capture packets SENT TO this machine on port 5520
+    - Will NOT capture traffic between other hosts
+    - For production/realistic capture, use Scapy/tcpdump/Wireshark:
+        sudo tcpdump -i any -w capture.pcap udp port 5520
+        OR: pip install scapy (see requirements.txt)
+    
+    This implementation is best-effort for:
+    - Testing packet replay functionality
+    - Capturing packets from a local server
+    - Extracting ground truth from controlled environments
+    
+    For real client↔server traffic analysis, use proper packet sniffing tools.
     """
     
     def __init__(self, port: int = 5520, interface: str = "0.0.0.0"):
