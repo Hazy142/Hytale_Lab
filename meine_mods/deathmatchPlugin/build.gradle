@@ -1,39 +1,68 @@
 plugins {
     id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
 group = 'de.hazy.deathmatch'
-version = '1.0.1'
+version = '2.0.0-alpha'
+archivesBaseName = 'deathmatchPlugin'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java']
-        }
-        resources {
-            srcDirs = ['src/main/resources']
-        }
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
 repositories {
     mavenCentral()
+    // Local HytaleServer.jar repository
+    flatDir {
+        dirs '../1013/Server'
+    }
 }
 
 dependencies {
-    // Add your HytaleServer.jar as a compile-only dependency   
-    compileOnly files('../1013/Server/HytaleServer.jar')
+    // ===== HYTALE CORE =====
+    compileOnly name: 'HytaleServer'
+    
+    // ===== LOGGING & UTILITIES =====
+    implementation 'org.slf4j:slf4j-api:2.0.7'
+    implementation 'ch.qos.logback:logback-classic:1.4.11'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // ===== DATABASE & PERSISTENCE =====
+    implementation 'org.sqlite:sqlite-jdbc:3.44.0.0'
+    implementation 'com.zaxxer:HikariCP:5.0.1'
+    
+    // ===== TESTING =====
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.5.1'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.compilerArgs = ['--enable-preview']
 }
 
 jar {
-    archiveBaseName = 'deathmatchPlugin'
-    archiveVersion = '1.0.1'
+    manifest {
+        attributes(
+                'Implementation-Title': archivesBaseName,
+                'Implementation-Version': version,
+                'Implementation-Vendor': 'Hazy142',
+                'Multi-Release': 'true'
+        )
+    }
+    from(sourceSets.main.output)
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+        }
+    }
 }
