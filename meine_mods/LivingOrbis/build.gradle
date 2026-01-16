@@ -10,17 +10,11 @@ repositories {
 }
 
 dependencies {
-    // Local Hytale Server JAR (Pfad ggf. anpassen)
+    // Local Hytale Server JAR
     compileOnly files('f:/Hytale_Lab/1013/Server/HytaleServer.jar')
     
     // Gson for JSON processing
     implementation 'com.google.code.gson:gson:2.10.1'
-
-    // Jackson for advanced JSON/YAML (optional but good for future proofing)
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
-
-    // HTTP Client (Standard Java 11+, but useful utils often needed)
-    // implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
 }
 
 java {

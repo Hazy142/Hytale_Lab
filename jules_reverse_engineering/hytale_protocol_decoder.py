@@ -12,15 +12,11 @@ from typing import Dict, Any, Tuple
 
 class PacketID(Enum):
     MOVEMENT = 0x01
-    MOVEMENT_UPDATE = 0x02
     CHAT = 0x03
-    CHAT_BROADCAST = 0x04
     BLOCK_INTERACTION = 0x05
-    BLOCK_UPDATE = 0x06
     ITEM_USE = 0x07
     ENTITY_SPAWN = 0x08
-    PLAYER_ACTION = 0x09
-    GAME_PHASE_CHANGE = 0x0A
+    GAME_PHASE_CHANGE = 0x0F
 
 class VarInt:
     @staticmethod
@@ -91,22 +87,12 @@ class HytalePacket:
         """Decode payload based on packet ID"""
         if self.packet_id == PacketID.MOVEMENT.value:
             return self._decode_movement()
-        elif self.packet_id == PacketID.MOVEMENT_UPDATE.value:
-            return self._decode_movement_update()
         elif self.packet_id == PacketID.CHAT.value:
             return self._decode_chat()
-        elif self.packet_id == PacketID.CHAT_BROADCAST.value:
-            return self._decode_chat_broadcast()
         elif self.packet_id == PacketID.BLOCK_INTERACTION.value:
             return self._decode_block_interaction()
-        elif self.packet_id == PacketID.BLOCK_UPDATE.value:
-            return self._decode_block_update()
-        elif self.packet_id == PacketID.ITEM_USE.value:
-            return self._decode_item_use()
         elif self.packet_id == PacketID.ENTITY_SPAWN.value:
             return self._decode_entity_spawn()
-        elif self.packet_id == PacketID.PLAYER_ACTION.value:
-            return self._decode_player_action()
         elif self.packet_id == PacketID.GAME_PHASE_CHANGE.value:
             return self._decode_game_phase_change()
         else:
@@ -115,16 +101,30 @@ class HytalePacket:
     def _decode_movement(self) -> Dict[str, Any]:
         """Decode 0x01 Movement packet"""
         offset = 0
+
+        # UUID (16 bytes)
         player_id = self.payload[offset:offset+16].hex()
         offset += 16
+
+        # Position (Vector3f, 12 bytes)
         position, offset = Vector3f.from_bytes(self.payload, offset)
+
+        # Velocity (Vector3f, 12 bytes)
         velocity, offset = Vector3f.from_bytes(self.payload, offset)
+
+        # Yaw (f32, 4 bytes)
         yaw = struct.unpack_from('>f', self.payload, offset)[0]
         offset += 4
+
+        # Pitch (f32, 4 bytes)
         pitch = struct.unpack_from('>f', self.payload, offset)[0]
         offset += 4
+
+        # Flags (u8, 1 byte)
         flags = self.payload[offset]
         offset += 1
+
+        # Tick (u32, 4 bytes)
         tick = struct.unpack_from('>I', self.payload, offset)[0]
 
         return {
@@ -144,35 +144,17 @@ class HytalePacket:
             "tick": tick
         }
 
-    def _decode_movement_update(self) -> Dict[str, Any]:
-        """Decode 0x02 Movement Update packet"""
-        offset = 0
-        entity_id = struct.unpack_from('>I', self.payload, offset)[0]
-        offset += 4
-        position, offset = Vector3f.from_bytes(self.payload, offset)
-        velocity, offset = Vector3f.from_bytes(self.payload, offset)
-        yaw = struct.unpack_from('>f', self.payload, offset)[0]
-        offset += 4
-        pitch = struct.unpack_from('>f', self.payload, offset)[0]
-        offset += 4
-
-        return {
-            "type": "MOVEMENT_UPDATE",
-            "entity_id": entity_id,
-            "position": {"x": position.x, "y": position.y, "z": position.z},
-            "velocity": {"x": velocity.x, "y": velocity.y, "z": velocity.z},
-            "yaw": yaw,
-            "pitch": pitch
-        }
-
     def _decode_chat(self) -> Dict[str, Any]:
         """Decode 0x03 Chat packet"""
         offset = 0
+
         player_id = self.payload[offset:offset+16].hex()
         offset += 16
+
         msg_length, offset = VarInt.decode(self.payload, offset)
         message = self.payload[offset:offset+msg_length].decode('utf-8')
         offset += msg_length
+
         timestamp = struct.unpack_from('>Q', self.payload, offset)[0]
 
         return {
@@ -182,34 +164,23 @@ class HytalePacket:
             "timestamp": timestamp
         }
 
-    def _decode_chat_broadcast(self) -> Dict[str, Any]:
-        """Decode 0x04 Chat Broadcast packet"""
-        offset = 0
-        msg_length, offset = VarInt.decode(self.payload, offset)
-        message = self.payload[offset:offset+msg_length].decode('utf-8')
-        offset += msg_length
-        position_byte = self.payload[offset]
-
-        positions = ["CHAT_BOX", "SYSTEM_MESSAGE", "ACTION_BAR"]
-        position_str = positions[position_byte] if position_byte < len(positions) else "UNKNOWN"
-
-        return {
-            "type": "CHAT_BROADCAST",
-            "message": message,
-            "position": position_str
-        }
-
     def _decode_block_interaction(self) -> Dict[str, Any]:
         """Decode 0x05 Block Interaction packet"""
         offset = 0
+
         player_id = self.payload[offset:offset+16].hex()
         offset += 16
+
         block_pos, offset = Vector3i.from_bytes(self.payload, offset)
+
         face = self.payload[offset]
         offset += 1
+
         action = self.payload[offset]
+
         faces = ["top", "bottom", "north", "south", "east", "west"]
         actions = ["place", "break", "interact"]
+
         return {
             "type": "BLOCK_INTERACTION",
             "player_id": player_id,
@@ -218,40 +189,23 @@ class HytalePacket:
             "action": actions[action] if action < len(actions) else f"unknown_{action}"
         }
 
-    def _decode_block_update(self) -> Dict[str, Any]:
-        """Decode 0x06 Block Update packet"""
-        offset = 0
-        block_pos, offset = Vector3i.from_bytes(self.payload, offset)
-        block_id, offset = VarInt.decode(self.payload, offset)
-
-        return {
-            "type": "BLOCK_UPDATE",
-            "position": {"x": block_pos.x, "y": block_pos.y, "z": block_pos.z},
-            "block_id": block_id
-        }
-
-    def _decode_item_use(self) -> Dict[str, Any]:
-        """Decode 0x07 Item Use packet"""
-        offset = 0
-        hand = self.payload[offset]
-        offset += 1
-
-        return {
-            "type": "ITEM_USE",
-            "hand": "MAIN_HAND" if hand == 0 else "OFF_HAND"
-        }
-
     def _decode_entity_spawn(self) -> Dict[str, Any]:
         """Decode 0x08 Entity Spawn packet"""
         offset = 0
+
         entity_id = struct.unpack_from('>I', self.payload, offset)[0]
         offset += 4
+
         entity_type = struct.unpack_from('>H', self.payload, offset)[0]
         offset += 2
+
         position, offset = Vector3f.from_bytes(self.payload, offset)
+
         yaw, pitch = struct.unpack_from('>ff', self.payload, offset)
         offset += 8
+
         entity_types = ["player", "monster", "npc", "item"]
+
         return {
             "type": "ENTITY_SPAWN",
             "entity_id": entity_id,
@@ -260,33 +214,21 @@ class HytalePacket:
             "rotation": {"yaw": yaw, "pitch": pitch}
         }
 
-    def _decode_player_action(self) -> Dict[str, Any]:
-        """Decode 0x09 Player Action packet"""
-        offset = 0
-        player_id = self.payload[offset:offset+16].hex()
-        offset += 16
-        action_id = self.payload[offset]
-        jump_boost = self.payload[offset+1]
-
-        actions = ["START_SNEAK", "STOP_SNEAK", "START_SPRINT", "STOP_SPRINT", "START_JUMP_HORSE", "STOP_JUMP_HORSE", "OPEN_INVENTORY", "START_FALL_FLYING"]
-
-        return {
-            "type": "PLAYER_ACTION",
-            "player_id": player_id,
-            "action": actions[action_id] if action_id < len(actions) else "UNKNOWN",
-            "jump_boost_percentage": jump_boost
-        }
-
     def _decode_game_phase_change(self) -> Dict[str, Any]:
-        """Decode 0x0A Game Phase Change packet"""
+        """Decode 0x0F Game Phase Change packet"""
         offset = 0
+
         phase = self.payload[offset]
         offset += 1
+
         duration = struct.unpack_from('>I', self.payload, offset)[0]
         offset += 4
+
         announcement_length, offset = VarInt.decode(self.payload, offset)
         announcement = self.payload[offset:offset+announcement_length].decode('utf-8')
+
         phases = ["LOBBY", "DAY", "VOTING", "NIGHT", "END"]
+
         return {
             "type": "GAME_PHASE_CHANGE",
             "new_phase": phases[phase] if phase < len(phases) else f"unknown_{phase}",
