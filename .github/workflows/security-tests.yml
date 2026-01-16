@@ -1,0 +1,74 @@
+name: Security Framework Tests
+
+on:
+  push:
+    branches: [ copilot/reverse-engineering-bug-bounty ]
+    paths:
+      - 'jules_reverse_engineering/**'
+      - '.github/workflows/security-tests.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'jules_reverse_engineering/**'
+
+jobs:
+  test-security-framework:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Verify core imports
+      run: |
+        cd jules_reverse_engineering
+        python -c "
+        from hytale_protocol_decoder import VarInt, HytalePacket
+        from hytale_bounty_fuzzer import HytaleFuzzer
+        from fuzzer_integration import IntegratedFuzzer
+        from state_tracer import StateTracer
+        from timing_fuzzer import RateLimitFuzzer
+        from packet_capture import PacketCapture
+        print('✓ All core imports working correctly')
+        print('✓ No import errors detected')
+        "
+        
+    - name: Run unit tests
+      run: |
+        cd jules_reverse_engineering
+        python test_harness_local.py
+        
+    - name: Verify PACKET_STRUCTURES.json
+      run: |
+        cd jules_reverse_engineering
+        python -c "
+        import json
+        with open('PACKET_STRUCTURES.json', 'r') as f:
+            structures = json.load(f)
+        print(f'✓ Loaded {len(structures)} packet definitions')
+        assert len(structures) >= 5, 'Expected at least 5 packet definitions'
+        print('✓ PACKET_STRUCTURES.json valid')
+        "
+        
+    - name: Test fuzzer integration
+      run: |
+        cd jules_reverse_engineering
+        python fuzzer_integration.py --packet 0x01 --mutations 3 | grep -q "Generated 3 mutations"
+        echo "✓ Fuzzer integration working"
+        
+    - name: Test state tracer
+      run: |
+        cd jules_reverse_engineering
+        python state_tracer.py --test auth_during_game | grep -q "scenario"
+        echo "✓ State tracer working"
+        
+    - name: Summary
+      run: |
+        echo "=========================================="
+        echo "✓ All security framework tests passed"
+        echo "=========================================="

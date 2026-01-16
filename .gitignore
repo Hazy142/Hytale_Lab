@@ -10,6 +10,9 @@
 !decompiled/**
 !jules_reverse_engineering/
 !jules_reverse_engineering/**
+!.github/
+!.github/workflows/
+!.github/workflows/**
 !README.md
 !.gitignore
 
