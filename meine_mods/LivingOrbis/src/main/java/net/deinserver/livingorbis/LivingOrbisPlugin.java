@@ -10,21 +10,21 @@ class CognitiveManager { public CognitiveManager(Object plugin) {} }
 class BehaviorManager { public BehaviorManager(Object plugin) {} }
 class GameModeManager { public GameModeManager(Object plugin) {} }
 
-public class SoulAlgorithmPlugin extends JavaPlugin {
+public class LivingOrbisPlugin extends JavaPlugin {
 
     private GeminiService geminiService;
     private CognitiveManager cognitiveManager;
     private BehaviorManager behaviorManager;
     private GameModeManager gameModeManager;
 
-    public SoulAlgorithmPlugin(JavaPluginInit init) {
+    public LivingOrbisPlugin(JavaPluginInit init) {
         super(init);
     }
 
     @Override
     public void onEnable() {
         Logger logger = getLogger();
-        logger.info("SoulAlgorithm wird initialisiert... 🌍✨");
+        logger.info("Living Orbis wird initialisiert... 🌍✨");
 
         // In einer Produktionsumgebung sollte dieser Key niemals im Code stehen.
         // Best Practice: Laden aus Umgebungsvariablen oder einer config.yml.
@@ -45,6 +45,6 @@ public class SoulAlgorithmPlugin extends JavaPlugin {
         // Register Command
         this.getCommandRegistry().registerCommand(new GeminiCommand(geminiService));
 
-        getLogger().at(Level.INFO).log("SoulAlgorithm Setup Complete. Managers loaded.");
+        getLogger().at(Level.INFO).log("Living Orbis Setup Complete. Managers loaded.");
     }
 }
