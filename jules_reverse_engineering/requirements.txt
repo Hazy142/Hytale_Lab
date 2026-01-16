@@ -1,0 +1,38 @@
+# Hytale Bug Bounty Framework - Python Dependencies
+# Core framework uses only Python standard library
+# Optional dependencies listed below for enhanced functionality
+
+# === OPTIONAL: Packet Capture (Advanced) ===
+# scapy>=2.5.0  # For professional packet capture/replay
+# Uncomment above if you want to use Scapy for packet capture
+# Note: packet_capture.py works without Scapy using raw sockets
+
+# === OPTIONAL: State Visualization ===
+# graphviz>=0.20  # For state machine diagram generation
+# Uncomment above if you want to visualize state diagrams
+# Alternative: Use online tools like http://www.webgraphviz.com/
+
+# === OPTIONAL: Advanced Analysis ===
+# numpy>=1.24.0  # For statistical analysis of timing attacks
+# matplotlib>=3.7.0  # For plotting response time distributions
+
+# === TESTING (Recommended) ===
+# pytest>=7.4.0  # Alternative test runner
+# pytest-cov>=4.1.0  # Test coverage reports
+
+# === DEVELOPMENT ===
+# black>=23.0.0  # Code formatting
+# pylint>=2.17.0  # Code linting
+# mypy>=1.4.0  # Type checking
+
+##############################################################
+# CORE FRAMEWORK RUNS WITHOUT ANY EXTERNAL DEPENDENCIES
+# All tools work with Python 3.8+ standard library only
+##############################################################
+
+# To install optional dependencies:
+# pip install -r requirements.txt
+
+# Or install only what you need:
+# pip install scapy  # For advanced packet capture
+# pip install graphviz  # For state diagrams

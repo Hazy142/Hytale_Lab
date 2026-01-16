@@ -1,3 +1,27 @@
+# Hytale Lab
+
+Comprehensive Hytale development resources including plugin development guides and security research tools.
+
+## 📁 Repository Structure
+
+- **`docs/`** - Complete Hytale development documentation
+- **`jules_reverse_engineering/`** - Security research & bug bounty framework
+- **`meine_mods/`** - Custom Hytale plugins and modifications
+- **`decompiled/`** - Reverse engineered server components
+
+## 🔒 Security Research Framework
+
+The `jules_reverse_engineering/` directory contains a comprehensive bug bounty security research framework:
+
+- **Hytale Protocol Decoder** - Parse and analyze network packets
+- **Security Fuzzer** - Automated vulnerability discovery tool
+- **Bug Bounty Templates** - Professional vulnerability reporting
+- **Research Strategy** - Complete guide for security researchers
+
+👉 See [jules_reverse_engineering/README_SECURITY.md](jules_reverse_engineering/README_SECURITY.md) for details.
+
+---
+
 # Hytale Plugin Development Guide
 
 This documentation provides a standardized approach for creating Hytale Server plugins using Java 25.
