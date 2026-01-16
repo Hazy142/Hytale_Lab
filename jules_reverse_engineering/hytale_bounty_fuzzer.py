@@ -128,6 +128,13 @@ class HytaleFuzzer:
     def send_packet(self, packet_data: bytes, timeout: float = 2.0) -> Optional[bytes]:
         """
         Send a packet to the Hytale server and return response
+        
+        NOTE: This is a simplified implementation for testing purposes.
+        Real Hytale protocol uses QUIC over UDP, which requires proper
+        handshaking and connection management. This implementation sends
+        raw UDP packets for basic testing. For production fuzzing, consider
+        using a QUIC library like aioquic or quiche.
+        
         Returns None if connection fails or times out
         """
         try:
@@ -155,12 +162,13 @@ class HytaleFuzzer:
         """
         logger.info("Testing IDOR - Player ID Forgery")
         
-        # Generate a range of fake player UUIDs
+        # Generate test UUIDs with distinctive prefix to avoid accidental collision
+        # Using test-specific prefix: 0xDEADBEEF + sequential numbers
         test_uuids = [
-            bytes.fromhex("00000000000000000000000000000001"),  # Sequential ID 1
-            bytes.fromhex("00000000000000000000000000000002"),  # Sequential ID 2
-            bytes.fromhex("ffffffffffffffffffffffffffffffff"),  # Max UUID
-            bytes.fromhex("00000000000000000000000000000000"),  # Zero UUID (admin?)
+            bytes.fromhex("deadbeef000000000000000000000001"),  # Test ID 1
+            bytes.fromhex("deadbeef000000000000000000000002"),  # Test ID 2
+            bytes.fromhex("deadbeef0000ffffffffffffffff0000"),  # Edge case UUID
+            bytes.fromhex("deadbeef000000000000000000000000"),  # Zero-suffix test
         ]
         
         for fake_uuid in test_uuids:
@@ -334,13 +342,18 @@ class HytaleFuzzer:
         """
         logger.info("Testing NaN/Infinity Float Values")
         
-        special_floats = [
-            ("NaN", struct.pack('>f', float('nan'))),
-            ("Infinity", struct.pack('>f', float('inf'))),
-            ("-Infinity", struct.pack('>f', float('-inf'))),
-            ("Very Large", struct.pack('>f', 1e38)),
-            ("Very Small", struct.pack('>f', 1e-38)),
-        ]
+        # IEEE 754 special float values - may behave differently on some platforms
+        try:
+            special_floats = [
+                ("NaN", struct.pack('>f', float('nan'))),
+                ("Infinity", struct.pack('>f', float('inf'))),
+                ("-Infinity", struct.pack('>f', float('-inf'))),
+                ("Very Large", struct.pack('>f', 1e38)),
+                ("Very Small", struct.pack('>f', 1e-38)),
+            ]
+        except (ValueError, OverflowError) as e:
+            logger.warning(f"Platform doesn't support all IEEE 754 special values: {e}")
+            return False
         
         for name, float_bytes in special_floats:
             packet = bytearray()

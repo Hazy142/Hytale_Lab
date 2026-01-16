@@ -581,8 +581,8 @@ You have **extraordinary competitive advantage** in Hytale bug bounty hunting be
 4. Submit professional reports using template
 5. Iterate based on feedback
 
-**Start Date:** Week 3, 2026 (KW 3)  
-**First Report Target:** End of Week 4  
+**Start Date:** January 13-19, 2026 (Week 3)  
+**First Report Target:** End of January 2026 (Week 4)  
 **Full Campaign:** 6-8 weeks
 
 ---

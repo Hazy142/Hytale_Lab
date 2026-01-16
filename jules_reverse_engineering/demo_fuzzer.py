@@ -24,7 +24,7 @@ def demo_varint_encoding():
     
     for value in test_values:
         encoded = VarInt.encode(value)
-        decoded, _ = VarInt.decode(encoded)
+        decoded, offset = VarInt.decode(encoded)  # offset indicates bytes consumed
         print(f"Value: {value:10d} | Encoded: {encoded.hex():20s} | Decoded: {decoded}")
     
     print("\n✓ VarInt encoding/decoding works correctly")
