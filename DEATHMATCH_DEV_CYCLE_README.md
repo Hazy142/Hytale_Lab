@@ -30,7 +30,7 @@ Dieses Projekt implementiert ein **vollautomatisiertes Development Cycle System*
 ├─────────────────────────────────────────────────────────┤
 │                                                           │
 │  ┌──────────────────────────────────────────────────┐   │
-│  │ Commit → .github/workflows/deathmatch-dev-cycle  │   │
+│  │ Commit → .github/workflows/dev-cycle             │   │
 │  │         ↓                                         │   │
 │  │  ┌─────────────────────────────────────────────┐ │   │
 │  │  │ Stage 1: Compilation (Java 25)              │ │   │
@@ -178,10 +178,10 @@ cd meine_mods/deathmatchPlugin
 
 ```bash
 # Trigger GitHub Actions workflow
-gh workflow run deathmatch-dev-cycle.yml --ref deathmatch/rebuild-v2
+gh workflow run dev-cycle.yml --ref deathmatch/rebuild-v2
 
 # View live status
-gh run list --workflow=deathmatch-dev-cycle.yml
+gh run list --workflow=dev-cycle.yml
 ```
 
 ### Check Notion Dashboard
@@ -301,7 +301,7 @@ Wenn das System fertig ist, wirst du sehen:
 
 ## 📄 Related Files
 
-- `.github/workflows/deathmatch-dev-cycle.yml` - Main CI/CD pipeline
+- `.github/workflows/dev-cycle.yml` - Main CI/CD pipeline
 - `build.gradle` - Java 25 configuration
 - `build.gradle.properties` - Integration settings
 - `system_dev_cycle_config.json` - Master configuration

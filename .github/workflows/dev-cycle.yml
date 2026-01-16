@@ -6,7 +6,7 @@ on:
       - deathmatch/rebuild-v2
     paths:
       - 'meine_mods/deathmatchPlugin/**'
-      - '.github/workflows/deathmatch-dev-cycle.yml'
+      - '.github/workflows/dev-cycle.yml'
   schedule:
     # Run every 6 hours automatically
     - cron: '0 */6 * * *'

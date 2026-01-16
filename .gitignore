@@ -8,6 +8,8 @@
 !docs/**
 !decompiled/
 !decompiled/**
+!.github/
+!.github/**
 !.gitignore
 
 # Re-ignore standard build artifacts (even in whitelisted folders)
