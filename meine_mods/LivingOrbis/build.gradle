@@ -13,8 +13,17 @@ dependencies {
     // Local Hytale Server JAR
     compileOnly files('f:/Hytale_Lab/1013/Server/HytaleServer.jar')
     
-    // Gson for JSON processing
+    // Gson for JSON processing (used by GeminiService)
     implementation 'com.google.code.gson:gson:2.10.1'
+    
+    // MongoDB for Vector DB (Long-term Memory) - Phase 2
+    implementation 'org.mongodb:mongodb-driver-sync:5.0.0'
+    
+    // Async utilities
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
+    
+    // Official Google GenAI SDK (Removed in favor of native HttpClient)
+    // implementation 'com.google.genai:google-genai:1.34.0'
 }
 
 java {
