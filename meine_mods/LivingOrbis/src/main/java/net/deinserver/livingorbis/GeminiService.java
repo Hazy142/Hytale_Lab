@@ -7,8 +7,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class GeminiService {
@@ -30,42 +28,18 @@ public class GeminiService {
 
     // Die Signatur signalisiert Asynchronität: CompletableFuture
     public CompletableFuture<String> askGemini(String prompt) {
-        return askGeminiWithContext(prompt, new ArrayList<>());
-    }
-
-    // New Method with Context/Memory Stream Support
-    public CompletableFuture<String> askGeminiWithContext(String prompt, List<String> memoryStream) {
         // 1. Aufbau des Request-Body (JSON Construction)
-        JsonArray contents = new JsonObject().getAsJsonArray("contents");
-        if (contents == null) contents = new JsonArray();
-
-        // Add history/context
-        for (String memory : memoryStream) {
-             // For now, we treat memory as simple text parts, potentially from 'model' or previous turns.
-             // A real implementation would parse roles.
-             // We'll treat memory stream as System/Context injection for now.
-             JsonObject part = new JsonObject();
-             part.addProperty("text", "CONTEXT: " + memory);
-
-             JsonArray parts = new JsonArray();
-             parts.add(part);
-
-             JsonObject roleObj = new JsonObject();
-             roleObj.addProperty("role", "user"); // Injecting context as user messages for simplicity
-             roleObj.add("parts", parts);
-             contents.add(roleObj);
-        }
-
-        // Add current prompt
+        JsonObject content = new JsonObject();
+        JsonArray parts = new JsonArray();
         JsonObject textPart = new JsonObject();
         textPart.addProperty("text", prompt);
-        JsonArray parts = new JsonArray();
         parts.add(textPart);
 
         JsonObject userRole = new JsonObject();
         userRole.addProperty("role", "user");
         userRole.add("parts", parts);
 
+        JsonArray contents = new JsonArray();
         contents.add(userRole);
 
         JsonObject requestBody = new JsonObject();
@@ -84,7 +58,7 @@ public class GeminiService {
                     // HTTP Status Code Check
                     if (response.statusCode() != 200) {
                         // Logging des Fehlers wäre hier wichtig für Debugging
-                         System.err.println("API Error: " + response.body());
+                        // System.err.println("API Error: " + response.body());
                         return "Der NPC schaut dich verwirrt an. (API Error: " + response.statusCode() + ")";
                     }
                     return extractTextFromResponse(response.body());
